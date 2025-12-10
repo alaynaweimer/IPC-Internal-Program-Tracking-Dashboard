@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPC + IEF Operations Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-elevated: #22222e;
+            --accent-gold: #d4a853;
+            --accent-gold-dim: #b8923f;
+            --accent-emerald: #34d399;
+            --accent-rose: #fb7185;
+            --accent-sky: #38bdf8;
+            --accent-violet: #a78bfa;
+            --accent-amber: #fbbf24;
+            --accent-teal: #2dd4bf;
+            --text-primary: #f8f8f8;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border-subtle: rgba(255,255,255,0.08);
+            --border-accent: rgba(212,168,83,0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(212,168,83,0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(52,211,153,0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+            padding: 1.25rem 1.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--bg-primary);
+        }
+
+        .logo.ipc { background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber)); }
+        .logo.ief { background: linear-gradient(135deg, var(--accent-teal), var(--accent-emerald)); }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-teal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .status-dot.connected { background: var(--accent-emerald); }
+        .status-dot.error { background: var(--accent-rose); }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dim));
+            color: var(--bg-primary);
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        /* Setup Panel */
+        .setup-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-accent);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .setup-panel.active { display: block; }
+
+        .setup-panel h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--accent-gold);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 0.6rem 0.85rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        .setup-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        /* Entity Tabs */
+        .entity-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .entity-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .entity-tab:hover { border-color: var(--accent-gold); }
+
+        .entity-tab.active.ipc {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
+            color: var(--bg-primary);
+            border-color: transparent;
+        }
+
+        .entity-tab.active.ief {
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-emerald));
+            color: var(--bg-primary);
+            border-color: transparent;
+        }
+
+        .entity-tab.active.all {
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-sky));
+            color: var(--bg-primary);
+            border-color: transparent;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .filter-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .filter-select {
+            padding: 0.4rem 0.6rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            min-width: 130px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 180px;
+            max-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.4rem 0.6rem 0.4rem 1.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-size: 0.75rem;
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.65rem;
+            opacity: 0.5;
+        }
+
+        .clear-filters {
+            font-size: 0.7rem;
+            color: var(--accent-gold);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* View Tabs */
+        .view-tabs {
+            display: flex;
+            gap: 0.2rem;
+            background: var(--bg-card);
+            padding: 0.2rem;
+            border-radius: 6px;
+            margin-bottom: 1.25rem;
+            width: fit-content;
+        }
+
+        .view-tab {
+            padding: 0.4rem 0.85rem;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .view-tab:hover { color: var(--text-primary); }
+
+        .view-tab.active {
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 0.85rem;
+            border: 1px solid var(--border-subtle);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .metric-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-2px);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+
+        .metric-card.gold::before { background: var(--accent-gold); }
+        .metric-card.emerald::before { background: var(--accent-emerald); }
+        .metric-card.rose::before { background: var(--accent-rose); }
+        .metric-card.sky::before { background: var(--accent-sky); }
+        .metric-card.violet::before { background: var(--accent-violet); }
+        .metric-card.amber::before { background: var(--accent-amber); }
+        .metric-card.teal::before { background: var(--accent-teal); }
+
+        .metric-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--text-muted);
+            margin-bottom: 0.2rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .metric-card.gold .metric-value { color: var(--accent-gold); }
+        .metric-card.emerald .metric-value { color: var(--accent-emerald); }
+        .metric-card.rose .metric-value { color: var(--accent-rose); }
+        .metric-card.sky .metric-value { color: var(--accent-sky); }
+        .metric-card.violet .metric-value { color: var(--accent-violet); }
+        .metric-card.amber .metric-value { color: var(--accent-amber); }
+        .metric-card.teal .metric-value { color: var(--accent-teal); }
+
+        .metric-sub {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 1.25rem;
+        }
+
+        /* Program Cards */
+        .programs-grid {
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .program-card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-subtle);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .program-card:hover {
+            border-color: var(--border-accent);
+        }
+
+        .program-card.entity-ipc { border-left: 3px solid var(--accent-gold); }
+        .program-card.entity-ief { border-left: 3px solid var(--accent-teal); }
+
+        .program-header {
+            padding: 0.85rem 1rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .program-title-section h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .entity-badge {
+            font-size: 0.55rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .entity-badge.ipc { background: rgba(212,168,83,0.2); color: var(--accent-gold); }
+        .entity-badge.ief { background: rgba(45,212,191,0.2); color: var(--accent-teal); }
+
+        .program-lead {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .program-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .meta-item {
+            text-align: center;
+        }
+
+        .meta-value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .meta-label {
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .program-status {
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.55rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-on-track { background: rgba(52,211,153,0.15); color: var(--accent-emerald); }
+        .status-at-risk { background: rgba(251,113,133,0.15); color: var(--accent-rose); }
+        .status-planning { background: rgba(167,139,250,0.15); color: var(--accent-violet); }
+        .status-completed { background: rgba(56,189,248,0.15); color: var(--accent-sky); }
+        .status-on-hold { background: rgba(251,191,36,0.15); color: var(--accent-amber); }
+
+        .program-progress-bar {
+            height: 3px;
+            background: var(--bg-secondary);
+        }
+
+        .program-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-emerald));
+        }
+
+        .program-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .program-card.expanded .program-body {
+            max-height: 2000px;
+        }
+
+        .program-details {
+            padding: 0.85rem 1rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .detail-item label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 0.1rem;
+        }
+
+        .detail-item span {
+            font-size: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .team-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin-top: 0.6rem;
+        }
+
+        .team-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.45rem;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            font-size: 0.65rem;
+        }
+
+        .avatar {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.45rem;
+            font-weight: 600;
+            color: var(--bg-primary);
+        }
+
+        .tasks-section {
+            padding: 0.85rem 1rem;
+        }
+
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+
+        .tasks-header h4 {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .task-count {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.5rem 0.6rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            margin-bottom: 0.35rem;
+            border-left: 3px solid transparent;
+        }
+
+        .task-item.priority-high { border-left-color: var(--accent-rose); }
+        .task-item.priority-medium { border-left-color: var(--accent-amber); }
+        .task-item.priority-low { border-left-color: var(--accent-emerald); }
+
+        .task-checkbox {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--text-muted);
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .task-checkbox.completed {
+            background: var(--accent-emerald);
+            border-color: var(--accent-emerald);
+        }
+
+        .task-checkbox.completed::after {
+            content: '✓';
+            color: var(--bg-primary);
+            font-size: 0.5rem;
+            font-weight: bold;
+        }
+
+        .task-content { flex: 1; min-width: 0; }
+
+        .task-title {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .task-title.completed {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+        }
+
+        .task-due.overdue { color: var(--accent-rose); font-weight: 600; }
+        .task-due.soon { color: var(--accent-amber); }
+
+        .expand-icon {
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+        }
+
+        .program-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Lead View */
+        .lead-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 0.85rem;
+        }
+
+        .lead-card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-subtle);
+            overflow: hidden;
+        }
+
+        .lead-header {
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .lead-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--bg-primary);
+        }
+
+        .lead-info h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .lead-role {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .lead-stats {
+            display: flex;
+            gap: 0.65rem;
+            margin-left: auto;
+        }
+
+        .lead-stat {
+            text-align: center;
+        }
+
+        .lead-stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .lead-stat-label {
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .lead-tasks {
+            padding: 0.65rem 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .lead-task-program {
+            font-size: 0.6rem;
+            color: var(--accent-gold);
+            margin-bottom: 0.1rem;
+        }
+
+        /* Timeline View */
+        .timeline-view {
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-subtle);
+            padding: 1rem;
+        }
+
+        .timeline-month {
+            margin-bottom: 1rem;
+        }
+
+        .timeline-month-header {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 0.6rem;
+            padding-bottom: 0.35rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.4rem 0.55rem;
+            background: var(--bg-secondary);
+            border-radius: 5px;
+            font-size: 0.7rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-item-date {
+            font-weight: 600;
+            color: var(--accent-gold);
+            min-width: 35px;
+        }
+
+        .timeline-item-entity {
+            font-size: 0.55rem;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+        }
+
+        .timeline-item-entity.ipc { background: rgba(212,168,83,0.2); color: var(--accent-gold); }
+        .timeline-item-entity.ief { background: rgba(45,212,191,0.2); color: var(--accent-teal); }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .sidebar-card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-subtle);
+            padding: 1rem;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.7rem;
+        }
+
+        .sidebar-header h3 {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .sidebar-badge {
+            font-size: 0.6rem;
+            padding: 0.15rem 0.4rem;
+            background: var(--accent-rose);
+            color: white;
+            border-radius: 8px;
+        }
+
+        .deadline-item {
+            display: flex;
+            gap: 0.55rem;
+            padding: 0.45rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .deadline-item:last-child { border-bottom: none; }
+
+        .deadline-date {
+            text-align: right;
+            min-width: 35px;
+        }
+
+        .deadline-day {
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            color: var(--accent-gold);
+        }
+
+        .deadline-month {
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .deadline-content { flex: 1; }
+
+        .deadline-task {
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-bottom: 0.1rem;
+        }
+
+        .deadline-meta {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+        }
+
+        .deadline-item.overdue .deadline-day { color: var(--accent-rose); }
+
+        .workload-item {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .workload-item:last-child { border-bottom: none; }
+
+        .workload-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            font-weight: 600;
+            color: var(--bg-primary);
+        }
+
+        .workload-info { flex: 1; }
+
+        .workload-name {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .workload-tasks {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+        }
+
+        .workload-bar {
+            width: 45px;
+            height: 4px;
+            background: var(--bg-elevated);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .workload-fill {
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        .workload-fill.low { background: var(--accent-emerald); }
+        .workload-fill.medium { background: var(--accent-amber); }
+        .workload-fill.high { background: var(--accent-rose); }
+
+        /* Entity Summary */
+        .entity-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .entity-summary-card {
+            padding: 0.6rem 0.75rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .entity-summary-card.ipc { border-color: rgba(212,168,83,0.3); }
+        .entity-summary-card.ief { border-color: rgba(45,212,191,0.3); }
+
+        .entity-summary-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .entity-summary-value {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .entity-summary-card.ipc .entity-summary-value { color: var(--accent-gold); }
+        .entity-summary-card.ief .entity-summary-value { color: var(--accent-teal); }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .sidebar { display: grid; grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 900px) {
+            .metrics-grid { grid-template-columns: repeat(4, 1fr); }
+            .sidebar { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+        }
+
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 2px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-brand">
+                <div class="logo-group">
+                    <div class="logo ipc">IPC</div>
+                    <div class="logo ief">IEF</div>
+                </div>
+                <div>
+                    <h1>Operations Hub</h1>
+                    <p class="header-subtitle">Ignite Positive Changes + IEF Fractional Services</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="connection-status">
+                    <span class="status-dot" id="status-dot"></span>
+                    <span id="status-text">Not connected</span>
+                </div>
+                <button class="btn-icon" onclick="refreshData()" title="Refresh">↻</button>
+                <button class="btn btn-secondary" onclick="toggleSetup()">⚙️ Setup</button>
+                <a class="btn btn-primary" id="sheet-link" href="#" target="_blank" style="display: none;">📊 Sheet</a>
+            </div>
+        </header>
+
+        <!-- Setup Panel -->
+        <div class="setup-panel" id="setup-panel">
+            <h2>📊 Connect Google Sheet</h2>
+            <div class="form-group">
+                <label class="form-label">Google Sheet ID</label>
+                <input type="text" class="form-input" id="sheet-id-input" placeholder="Your IPC+IEF Master Sheet ID">
+            </div>
+            <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: -0.5rem;">
+                Sheet needs tabs: Programs, Tasks, Team. Programs should have "Entity" column (IPC or IEF).
+            </p>
+            <div class="setup-actions">
+                <button class="btn btn-primary" onclick="connectSheet()">Connect</button>
+                <button class="btn btn-secondary" onclick="loadDemoData()">Load Demo</button>
+            </div>
+        </div>
+
+        <!-- Entity Tabs -->
+        <div class="entity-tabs" id="entity-tabs" style="display: none;">
+            <button class="entity-tab active all" data-entity="all" onclick="filterEntity('all')">All Projects</button>
+            <button class="entity-tab ipc" data-entity="ipc" onclick="filterEntity('ipc')">IPC</button>
+            <button class="entity-tab ief" data-entity="ief" onclick="filterEntity('ief')">IEF</button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar" id="filter-bar" style="display: none;">
+            <div class="filter-group">
+                <span class="filter-label">Project</span>
+                <select class="filter-select" id="filter-program" onchange="applyFilters()">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Lead</span>
+                <select class="filter-select" id="filter-lead" onchange="applyFilters()">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Assignee</span>
+                <select class="filter-select" id="filter-assignee" onchange="applyFilters()">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Status</span>
+                <select class="filter-select" id="filter-status" onchange="applyFilters()">
+                    <option value="">All</option>
+                    <option value="planning">Planning</option>
+                    <option value="on-track">On Track</option>
+                    <option value="at-risk">At Risk</option>
+                    <option value="on-hold">On Hold</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Due</span>
+                <select class="filter-select" id="filter-due" onchange="applyFilters()">
+                    <option value="">Any</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+            </div>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search..." oninput="applyFilters()">
+            </div>
+            <button class="clear-filters" onclick="clearFilters()">Clear</button>
+        </div>
+
+        <!-- View Tabs -->
+        <div class="view-tabs" id="view-tabs" style="display: none;">
+            <button class="view-tab active" data-view="projects" onclick="switchView('projects')">By Project</button>
+            <button class="view-tab" data-view="leads" onclick="switchView('leads')">By Lead</button>
+            <button class="view-tab" data-view="assignees" onclick="switchView('assignees')">By Assignee</button>
+            <button class="view-tab" data-view="tasks" onclick="switchView('tasks')">All Tasks</button>
+            <button class="view-tab" data-view="timeline" onclick="switchView('timeline')">By Timeline</button>
+        </div>
+
+        <!-- Metrics -->
+        <div class="metrics-grid" id="metrics-grid" style="display: none;">
+            <div class="metric-card gold">
+                <div class="metric-label">Active Projects</div>
+                <div class="metric-value" id="m-projects">0</div>
+            </div>
+            <div class="metric-card emerald">
+                <div class="metric-label">Completed</div>
+                <div class="metric-value" id="m-complete">0</div>
+                <div class="metric-sub" id="m-complete-pct">0%</div>
+            </div>
+            <div class="metric-card sky">
+                <div class="metric-label">In Progress</div>
+                <div class="metric-value" id="m-progress">0</div>
+            </div>
+            <div class="metric-card rose">
+                <div class="metric-label">Overdue</div>
+                <div class="metric-value" id="m-overdue">0</div>
+            </div>
+            <div class="metric-card amber">
+                <div class="metric-label">Due This Week</div>
+                <div class="metric-value" id="m-week">0</div>
+            </div>
+            <div class="metric-card teal">
+                <div class="metric-label">IEF Tasks</div>
+                <div class="metric-value" id="m-ief">0</div>
+            </div>
+            <div class="metric-card violet">
+                <div class="metric-label">Team</div>
+                <div class="metric-value" id="m-team">0</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-layout" id="main-content" style="display: none;">
+            <div class="content-area" id="content-area"></div>
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <h3>⚡ Deadlines</h3>
+                        <span class="sidebar-badge" id="deadline-count">0</span>
+                    </div>
+                    <div id="deadlines-list"></div>
+                </div>
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <h3>👥 Workload</h3>
+                    </div>
+                    <div class="entity-summary">
+                        <div class="entity-summary-card ipc">
+                            <div class="entity-summary-label">IPC Tasks</div>
+                            <div class="entity-summary-value" id="ipc-task-count">0</div>
+                        </div>
+                        <div class="entity-summary-card ief">
+                            <div class="entity-summary-label">IEF Tasks</div>
+                            <div class="entity-summary-value" id="ief-task-count">0</div>
+                        </div>
+                    </div>
+                    <div id="workload-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Welcome State -->
+        <div class="empty-state" id="welcome-state">
+            <div class="empty-state-icon">📊</div>
+            <p>Connect your IPC + IEF Google Sheet</p>
+            <p style="font-size: 0.75rem; margin-top: 0.35rem;">Click Setup to connect or Load Demo to preview</p>
+        </div>
+    </div>
+
+    <script>
+        // State
+        const CONFIG_KEY = 'ipc-ief-dashboard';
+        let config = { sheetId: localStorage.getItem(CONFIG_KEY) || '' };
+        let state = {
+            programs: [],
+            tasks: [],
+            team: [],
+            currentView: 'projects',
+            entityFilter: 'all',
+            filters: { program: '', lead: '', status: '', due: '', search: '' }
+        };
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('sheet-id-input').value = config.sheetId;
+            if (config.sheetId) connectSheet();
+        });
+
+        // Google Sheets
+        async function connectSheet() {
+            const sheetId = document.getElementById('sheet-id-input').value.trim();
+            if (!sheetId) return;
+            config.sheetId = sheetId;
+            localStorage.setItem(CONFIG_KEY, sheetId);
+            updateStatus('connecting');
+            try {
+                const [programs, tasks, team] = await Promise.all([
+                    fetchSheet(sheetId, 'Programs'),
+                    fetchSheet(sheetId, 'Tasks'),
+                    fetchSheet(sheetId, 'Team')
+                ]);
+                state.programs = parsePrograms(programs);
+                state.tasks = parseTasks(tasks);
+                state.team = parseTeam(team);
+                linkData();
+                updateStatus('connected');
+                showDashboard();
+                document.getElementById('sheet-link').href = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+                document.getElementById('sheet-link').style.display = 'flex';
+                document.getElementById('setup-panel').classList.remove('active');
+            } catch (e) {
+                console.error(e);
+                updateStatus('error');
+                alert('Connection failed. Check Sheet ID and publish settings.');
+            }
+        }
+
+        async function fetchSheet(sheetId, name) {
+            const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(name)}`;
+            const res = await fetch(url);
+            const text = await res.text();
+            const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+            if (!match) throw new Error('Invalid response');
+            return JSON.parse(match[1]).table;
+        }
+
+        function parsePrograms(table) {
+            if (!table.rows) return [];
+            const cols = table.cols.map(c => (c.label || '').toLowerCase());
+            return table.rows.map((row, i) => {
+                const get = (col) => {
+                    const idx = cols.findIndex(c => c.includes(col));
+                    return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
+                };
+                return {
+                    id: i + 1,
+                    name: get('program') || get('project') || get('name'),
+                    entity: (get('entity') || 'ipc').toLowerCase(),
+                    lead: get('lead') || get('owner'),
+                    team: (get('team') || '').split(',').map(s => s.trim()).filter(Boolean),
+                    startDate: get('start'),
+                    endDate: get('end') || get('target'),
+                    status: normalizeStatus(get('status')),
+                    metrics: get('metric') || get('goal'),
+                    notes: get('note'),
+                    tasks: []
+                };
+            }).filter(p => p.name);
+        }
+
+        function parseTasks(table) {
+            if (!table.rows) return [];
+            const cols = table.cols.map(c => (c.label || '').toLowerCase());
+            return table.rows.map((row, i) => {
+                const get = (col) => {
+                    const idx = cols.findIndex(c => c.includes(col));
+                    return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
+                };
+                const status = (get('status') || '').toLowerCase();
+                return {
+                    id: i + 1,
+                    programName: get('program') || get('project'),
+                    name: get('task') || get('name'),
+                    assignee: get('assign') || get('owner'),
+                    dueDate: get('due'),
+                    priority: (get('priority') || 'medium').toLowerCase(),
+                    completed: ['complete', 'completed', 'done'].includes(status),
+                    entity: '' // Will be set from program
+                };
+            }).filter(t => t.name);
+        }
+
+        function parseTeam(table) {
+            if (!table.rows) return [];
+            const cols = table.cols.map(c => (c.label || '').toLowerCase());
+            return table.rows.map((row, i) => {
+                const get = (col) => {
+                    const idx = cols.findIndex(c => c.includes(col));
+                    return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
+                };
+                return {
+                    id: i + 1,
+                    name: get('name'),
+                    role: get('role') || get('title'),
+                    entity: (get('entity') || 'both').toLowerCase()
+                };
+            }).filter(t => t.name);
+        }
+
+        function normalizeStatus(s) {
+            s = (s || '').toLowerCase().replace(/\s+/g, '-');
+            const map = {
+                'on-track': 'on-track', 'ontrack': 'on-track', 'active': 'on-track',
+                'at-risk': 'at-risk', 'atrisk': 'at-risk', 'behind': 'at-risk',
+                'planning': 'planning', 'planned': 'planning', 'new': 'planning',
+                'completed': 'completed', 'complete': 'completed', 'done': 'completed',
+                'on-hold': 'on-hold', 'hold': 'on-hold', 'paused': 'on-hold'
+            };
+            return map[s] || 'planning';
+        }
+
+        function linkData() {
+            state.programs.forEach(p => {
+                p.tasks = state.tasks.filter(t => t.programName.toLowerCase() === p.name.toLowerCase());
+                p.tasks.forEach(t => t.entity = p.entity);
+            });
+        }
+
+        async function refreshData() { if (config.sheetId) await connectSheet(); }
+
+        // Demo Data
+        function loadDemoData() {
+            state.programs = [
+                { id: 1, name: 'Music Teacher Income Planner', entity: 'ipc', lead: 'Alayna', team: ['Alayna'], startDate: '2024-11-15', endDate: '2024-12-15', status: 'completed', metrics: 'Launch on Etsy, $47 price point', tasks: [] },
+                { id: 2, name: 'Delivery Driver Optimizer', entity: 'ipc', lead: 'Alayna', team: ['Alayna'], startDate: '2024-12-01', endDate: '2024-12-20', status: 'on-track', metrics: 'Complete toolkit, Etsy listing', tasks: [] },
+                { id: 3, name: 'IEF Platform Build', entity: 'ief', lead: 'Emily', team: ['Emily', 'Alayna'], startDate: '2024-10-01', endDate: '2025-01-15', status: 'on-track', metrics: '3 tiers ($97-$997), 50 subscribers', tasks: [] },
+                { id: 4, name: 'In Reach Therapy Onboarding', entity: 'ief', lead: 'Emily', team: ['Emily'], startDate: '2024-12-01', endDate: '2024-12-31', status: 'on-track', metrics: 'Full ops setup, $4,500/mo retainer', tasks: [] },
+                { id: 5, name: 'Bearded Bookseller Press', entity: 'ipc', lead: 'Marcus', team: ['Marcus', 'Sarah', 'Alayna'], startDate: '2024-01-15', endDate: '2025-06-30', status: 'on-track', metrics: 'Launch 3 titles, $15K revenue', tasks: [] },
+                { id: 6, name: 'Central Oregon Volunteer Connect', entity: 'ipc', lead: 'Alayna', team: ['Alayna'], startDate: '2024-11-01', endDate: '2024-12-31', status: 'at-risk', metrics: 'Giving Tuesday campaign, 100 signups', tasks: [] }
+            ];
+            state.tasks = [
+                // Music Teacher (completed)
+                { id: 1, programName: 'Music Teacher Income Planner', name: 'Build calculator HTML', assignee: 'Alayna', dueDate: '2024-12-05', priority: 'high', completed: true },
+                { id: 2, programName: 'Music Teacher Income Planner', name: 'Create Etsy listing', assignee: 'Alayna', dueDate: '2024-12-10', priority: 'high', completed: true },
+                // Delivery Driver
+                { id: 3, programName: 'Delivery Driver Optimizer', name: 'Research gig platforms', assignee: 'Alayna', dueDate: '2024-12-08', priority: 'medium', completed: true },
+                { id: 4, programName: 'Delivery Driver Optimizer', name: 'Build expense tracker', assignee: 'Alayna', dueDate: '2024-12-12', priority: 'high', completed: false },
+                { id: 5, programName: 'Delivery Driver Optimizer', name: 'Create route optimizer', assignee: 'Alayna', dueDate: '2024-12-15', priority: 'high', completed: false },
+                { id: 6, programName: 'Delivery Driver Optimizer', name: 'Write listing copy', assignee: 'Alayna', dueDate: '2024-12-18', priority: 'medium', completed: false },
+                // IEF Platform
+                { id: 7, programName: 'IEF Platform Build', name: 'Complete Tier 1 resources', assignee: 'Emily', dueDate: '2024-12-15', priority: 'high', completed: false },
+                { id: 8, programName: 'IEF Platform Build', name: 'Set up payment processing', assignee: 'Emily', dueDate: '2024-12-20', priority: 'high', completed: false },
+                { id: 9, programName: 'IEF Platform Build', name: 'Create onboarding sequence', assignee: 'Alayna', dueDate: '2024-12-22', priority: 'medium', completed: false },
+                { id: 10, programName: 'IEF Platform Build', name: 'Build marketing page', assignee: 'Emily', dueDate: '2025-01-05', priority: 'medium', completed: false },
+                // In Reach
+                { id: 11, programName: 'In Reach Therapy Onboarding', name: 'Complete discovery call', assignee: 'Emily', dueDate: '2024-12-05', priority: 'high', completed: true },
+                { id: 12, programName: 'In Reach Therapy Onboarding', name: 'Create SOPs document', assignee: 'Emily', dueDate: '2024-12-12', priority: 'high', completed: false },
+                { id: 13, programName: 'In Reach Therapy Onboarding', name: 'Set up financial tracking', assignee: 'Emily', dueDate: '2024-12-18', priority: 'medium', completed: false },
+                // Bearded Bookseller
+                { id: 14, programName: 'Bearded Bookseller Press', name: 'Finalize Q1 cover designs', assignee: 'Sarah', dueDate: '2024-12-15', priority: 'high', completed: false },
+                { id: 15, programName: 'Bearded Bookseller Press', name: 'Complete ISBN registration', assignee: 'Marcus', dueDate: '2024-12-18', priority: 'high', completed: false },
+                { id: 16, programName: 'Bearded Bookseller Press', name: 'Set up distribution', assignee: 'Marcus', dueDate: '2024-12-22', priority: 'medium', completed: false },
+                // Volunteer Connect
+                { id: 17, programName: 'Central Oregon Volunteer Connect', name: 'Launch Giving Tuesday campaign', assignee: 'Alayna', dueDate: '2024-12-03', priority: 'high', completed: true },
+                { id: 18, programName: 'Central Oregon Volunteer Connect', name: 'Follow up with signups', assignee: 'Alayna', dueDate: '2024-12-10', priority: 'high', completed: false },
+                { id: 19, programName: 'Central Oregon Volunteer Connect', name: 'Create January calendar', assignee: 'Alayna', dueDate: '2024-12-20', priority: 'medium', completed: false }
+            ];
+            state.team = [
+                { id: 1, name: 'Alayna', role: 'CEO / Operations Lead', entity: 'both' },
+                { id: 2, name: 'Emily', role: 'Operations Partner', entity: 'ief' },
+                { id: 3, name: 'Marcus', role: 'Publisher', entity: 'ipc' },
+                { id: 4, name: 'Sarah', role: 'Creative Director', entity: 'ipc' }
+            ];
+            linkData();
+            updateStatus('connected');
+            showDashboard();
+            document.getElementById('setup-panel').classList.remove('active');
+        }
+
+        // UI
+        function updateStatus(s) {
+            const dot = document.getElementById('status-dot');
+            const txt = document.getElementById('status-text');
+            dot.className = 'status-dot';
+            if (s === 'connecting') txt.textContent = 'Connecting...';
+            else if (s === 'connected') { dot.classList.add('connected'); txt.textContent = 'Connected'; }
+            else if (s === 'error') { dot.classList.add('error'); txt.textContent = 'Error'; }
+            else txt.textContent = 'Not connected';
+        }
+
+        function toggleSetup() { document.getElementById('setup-panel').classList.toggle('active'); }
+
+        function showDashboard() {
+            document.getElementById('welcome-state').style.display = 'none';
+            document.getElementById('entity-tabs').style.display = 'flex';
+            document.getElementById('filter-bar').style.display = 'flex';
+            document.getElementById('view-tabs').style.display = 'flex';
+            document.getElementById('metrics-grid').style.display = 'grid';
+            document.getElementById('main-content').style.display = 'grid';
+            populateFilters();
+            renderAll();
+        }
+
+        function populateFilters() {
+            const progSelect = document.getElementById('filter-program');
+            progSelect.innerHTML = '<option value="">All</option>' + state.programs.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+            
+            // Leads (project owners)
+            const leads = [...new Set(state.programs.map(p => p.lead).filter(Boolean))].sort();
+            const leadSelect = document.getElementById('filter-lead');
+            leadSelect.innerHTML = '<option value="">All</option>' + leads.map(l => `<option value="${l}">${l}</option>`).join('');
+            
+            // Assignees (task assignees)
+            const assignees = [...new Set([...state.team.map(t => t.name), ...state.tasks.map(t => t.assignee).filter(Boolean)])].sort();
+            const assigneeSelect = document.getElementById('filter-assignee');
+            assigneeSelect.innerHTML = '<option value="">All</option>' + assignees.map(a => `<option value="${a}">${a}</option>`).join('');
+        }
+
+        function filterEntity(entity) {
+            state.entityFilter = entity;
+            document.querySelectorAll('.entity-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.entity === entity);
+            });
+            applyFilters();
+        }
+
+        function applyFilters() {
+            state.filters = {
+                program: document.getElementById('filter-program').value,
+                lead: document.getElementById('filter-lead').value,
+                assignee: document.getElementById('filter-assignee').value,
+                status: document.getElementById('filter-status').value,
+                due: document.getElementById('filter-due').value,
+                search: document.getElementById('search-input').value.toLowerCase()
+            };
+            renderAll();
+        }
+
+        function clearFilters() {
+            document.getElementById('filter-program').value = '';
+            document.getElementById('filter-lead').value = '';
+            document.getElementById('filter-assignee').value = '';
+            document.getElementById('filter-status').value = '';
+            document.getElementById('filter-due').value = '';
+            document.getElementById('search-input').value = '';
+            applyFilters();
+        }
+
+        function getFilteredData() {
+            let programs = [...state.programs];
+            let tasks = [...state.tasks];
+            // Entity filter
+            if (state.entityFilter !== 'all') {
+                programs = programs.filter(p => p.entity === state.entityFilter);
+                tasks = tasks.filter(t => t.entity === state.entityFilter);
+            }
+            if (state.filters.program) {
+                programs = programs.filter(p => p.name === state.filters.program);
+                tasks = tasks.filter(t => t.programName === state.filters.program);
+            }
+            if (state.filters.lead) {
+                programs = programs.filter(p => p.lead === state.filters.lead);
+                // Only show tasks from projects owned by this lead
+                const leadProjects = programs.map(p => p.name);
+                tasks = tasks.filter(t => leadProjects.includes(t.programName));
+            }
+            if (state.filters.assignee) {
+                tasks = tasks.filter(t => t.assignee === state.filters.assignee);
+            }
+            if (state.filters.status) programs = programs.filter(p => p.status === state.filters.status);
+            if (state.filters.due) {
+                const today = new Date(); today.setHours(0,0,0,0);
+                const week = new Date(today); week.setDate(week.getDate() + 7);
+                const month = new Date(today); month.setMonth(month.getMonth() + 1);
+                tasks = tasks.filter(t => {
+                    if (!t.dueDate) return false;
+                    const d = new Date(t.dueDate);
+                    if (state.filters.due === 'overdue') return d < today && !t.completed;
+                    if (state.filters.due === 'week') return d >= today && d <= week;
+                    if (state.filters.due === 'month') return d >= today && d <= month;
+                    return true;
+                });
+            }
+            if (state.filters.search) {
+                const s = state.filters.search;
+                tasks = tasks.filter(t => t.name.toLowerCase().includes(s) || (t.assignee||'').toLowerCase().includes(s));
+                programs = programs.filter(p => p.name.toLowerCase().includes(s) || (p.lead||'').toLowerCase().includes(s));
+            }
+            programs.forEach(p => { p.tasks = tasks.filter(t => t.programName === p.name); });
+            return { programs, tasks };
+        }
+
+        function switchView(view) {
+            state.currentView = view;
+            document.querySelectorAll('.view-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+            renderView();
+        }
+
+        function renderAll() {
+            renderMetrics();
+            renderView();
+            renderSidebar();
+        }
+
+        function renderMetrics() {
+            const { programs, tasks } = getFilteredData();
+            const complete = tasks.filter(t => t.completed).length;
+            const progress = tasks.filter(t => !t.completed).length;
+            const overdue = tasks.filter(t => !t.completed && t.dueDate && new Date(t.dueDate) < new Date()).length;
+            const week = new Date(); week.setDate(week.getDate() + 7);
+            const dueWeek = tasks.filter(t => !t.completed && t.dueDate && new Date(t.dueDate) >= new Date() && new Date(t.dueDate) <= week).length;
+            const iefTasks = state.tasks.filter(t => t.entity === 'ief' && !t.completed).length;
+            const ipcTasks = state.tasks.filter(t => t.entity === 'ipc' && !t.completed).length;
+            
+            document.getElementById('m-projects').textContent = programs.filter(p => p.status !== 'completed').length;
+            document.getElementById('m-complete').textContent = complete;
+            document.getElementById('m-complete-pct').textContent = tasks.length ? `${Math.round(complete/tasks.length*100)}%` : '0%';
+            document.getElementById('m-progress').textContent = progress;
+            document.getElementById('m-overdue').textContent = overdue;
+            document.getElementById('m-week').textContent = dueWeek;
+            document.getElementById('m-ief').textContent = iefTasks;
+            document.getElementById('m-team').textContent = [...new Set(tasks.map(t => t.assignee).filter(Boolean))].length;
+            document.getElementById('ipc-task-count').textContent = ipcTasks;
+            document.getElementById('ief-task-count').textContent = iefTasks;
+        }
+
+        function renderView() {
+            const container = document.getElementById('content-area');
+            const { programs, tasks } = getFilteredData();
+            if (state.currentView === 'projects') renderProjectsView(container, programs);
+            else if (state.currentView === 'leads') renderLeadsView(container, programs, tasks);
+            else if (state.currentView === 'assignees') renderAssigneesView(container, tasks);
+            else if (state.currentView === 'timeline') renderTimelineView(container, tasks);
+            else if (state.currentView === 'tasks') renderTasksView(container, tasks);
+        }
+
+        function renderProjectsView(container, programs) {
+            if (!programs.length) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No projects match filters</p></div>'; return; }
+            container.innerHTML = `<div class="programs-grid">${programs.map(renderProjectCard).join('')}</div>`;
+        }
+
+        function renderProjectCard(p) {
+            const done = p.tasks.filter(t => t.completed).length;
+            const total = p.tasks.length;
+            const pct = total ? Math.round(done/total*100) : 0;
+            const statusLabels = { 'planning': 'Planning', 'on-track': 'On Track', 'at-risk': 'At Risk', 'on-hold': 'On Hold', 'completed': 'Completed' };
+            const colors = ['#d4a853', '#34d399', '#38bdf8', '#a78bfa', '#fb7185'];
+            return `
+                <div class="program-card entity-${p.entity}" data-id="${p.id}">
+                    <div class="program-header" onclick="toggleProject(${p.id})">
+                        <div class="program-title-section">
+                            <h3><span class="entity-badge ${p.entity}">${p.entity.toUpperCase()}</span> ${esc(p.name)} <span class="program-status status-${p.status}">${statusLabels[p.status]}</span></h3>
+                            <div class="program-lead"><span class="avatar" style="background:${colors[0]}">${initials(p.lead)}</span>${esc(p.lead||'Unassigned')} · Lead</div>
+                        </div>
+                        <div class="program-meta">
+                            <div class="meta-item"><div class="meta-value">${done}/${total}</div><div class="meta-label">Tasks</div></div>
+                            <div class="meta-item"><div class="meta-value">${pct}%</div><div class="meta-label">Done</div></div>
+                            <svg class="expand-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                    </div>
+                    <div class="program-progress-bar"><div class="program-progress-fill" style="width:${pct}%"></div></div>
+                    <div class="program-body">
+                        <div class="program-details">
+                            <div class="details-grid">
+                                <div class="detail-item"><label>Timeline</label><span>${fmtDate(p.startDate)} → ${fmtDate(p.endDate)}</span></div>
+                                <div class="detail-item"><label>Metrics</label><span>${esc(p.metrics)||'—'}</span></div>
+                                <div class="detail-item"><label>Team</label><span>${p.team.length} members</span></div>
+                            </div>
+                            ${p.team.length ? `<div class="team-badges">${p.team.map((m,i)=>`<span class="team-badge"><span class="avatar" style="background:${colors[i%colors.length]}">${initials(m)}</span>${esc(m)}</span>`).join('')}</div>` : ''}
+                        </div>
+                        <div class="tasks-section">
+                            <div class="tasks-header"><h4>Tasks</h4><span class="task-count">${done} of ${total}</span></div>
+                            ${p.tasks.length ? p.tasks.map(renderTask).join('') : '<p style="color:var(--text-muted);font-size:0.7rem">No tasks</p>'}
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function renderTask(t) {
+            const over = t.dueDate && !t.completed && new Date(t.dueDate) < new Date();
+            const soon = t.dueDate && !t.completed && !over && (new Date(t.dueDate) - new Date()) < 3*24*60*60*1000;
+            return `
+                <div class="task-item priority-${t.priority}">
+                    <div class="task-checkbox ${t.completed?'completed':''}"></div>
+                    <div class="task-content">
+                        <div class="task-title ${t.completed?'completed':''}">${esc(t.name)}</div>
+                        <div class="task-meta">
+                            ${t.assignee?`<span>👤 ${esc(t.assignee)}</span>`:''}
+                            ${t.dueDate?`<span class="task-due ${over?'overdue':''} ${soon?'soon':''}">📅 ${fmtDate(t.dueDate)}${over?' (overdue)':''}</span>`:''}
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function renderLeadsView(container, programs, tasks) {
+            const leads = {};
+            programs.forEach(p => {
+                if (!p.lead) return;
+                if (!leads[p.lead]) {
+                    const tm = state.team.find(m => m.name === p.lead);
+                    leads[p.lead] = { name: p.lead, role: tm?.role || 'Project Lead', programs: [], entities: new Set() };
+                }
+                leads[p.lead].programs.push(p);
+                leads[p.lead].entities.add(p.entity);
+            });
+            const list = Object.values(leads).sort((a,b) => b.programs.length - a.programs.length);
+            if (!list.length) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>No project leads found</p></div>'; return; }
+            const colors = ['#d4a853', '#34d399', '#38bdf8', '#a78bfa', '#fb7185'];
+            container.innerHTML = `<div class="lead-grid">${list.map((l,i) => {
+                const totalTasks = l.programs.reduce((sum, p) => sum + p.tasks.length, 0);
+                const doneTasks = l.programs.reduce((sum, p) => sum + p.tasks.filter(t => t.completed).length, 0);
+                const entityList = [...l.entities].map(e => e.toUpperCase()).join(', ');
+                return `
+                    <div class="lead-card">
+                        <div class="lead-header">
+                            <div class="lead-avatar" style="background:${colors[i%colors.length]}">${initials(l.name)}</div>
+                            <div class="lead-info"><h3>${esc(l.name)}</h3><div class="lead-role">${esc(l.role)} · ${entityList}</div></div>
+                            <div class="lead-stats">
+                                <div class="lead-stat"><div class="lead-stat-value" style="color:var(--accent-gold)">${l.programs.length}</div><div class="lead-stat-label">Projects</div></div>
+                                <div class="lead-stat"><div class="lead-stat-value" style="color:var(--accent-sky)">${totalTasks - doneTasks}</div><div class="lead-stat-label">Pending</div></div>
+                            </div>
+                        </div>
+                        <div class="lead-tasks">${l.programs.map(p=>`
+                            <div class="task-item" style="border-left-color: ${p.entity === 'ief' ? 'var(--accent-teal)' : 'var(--accent-gold)'}">
+                                <div class="task-content">
+                                    <div class="lead-task-program"><span class="entity-badge ${p.entity}">${p.entity.toUpperCase()}</span> ${esc(p.name)}</div>
+                                    <div class="task-meta"><span class="status-badge status-${p.status}">${p.status}</span> · ${p.tasks.filter(t=>t.completed).length}/${p.tasks.length} tasks</div>
+                                </div>
+                            </div>`).join('')}</div>
+                    </div>`;
+            }).join('')}</div>`;
+        }
+
+        function renderAssigneesView(container, tasks) {
+            const assignees = {};
+            tasks.forEach(t => {
+                if (!t.assignee) return;
+                if (!assignees[t.assignee]) {
+                    const tm = state.team.find(m => m.name === t.assignee);
+                    assignees[t.assignee] = { name: t.assignee, role: tm?.role || '', tasks: [], entities: new Set() };
+                }
+                assignees[t.assignee].tasks.push(t);
+                assignees[t.assignee].entities.add(t.entity);
+            });
+            const list = Object.values(assignees).sort((a,b) => b.tasks.filter(t=>!t.completed).length - a.tasks.filter(t=>!t.completed).length);
+            if (!list.length) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>No task assignments</p></div>'; return; }
+            const colors = ['#d4a853', '#34d399', '#38bdf8', '#a78bfa', '#fb7185'];
+            container.innerHTML = `<div class="lead-grid">${list.map((l,i) => {
+                const done = l.tasks.filter(t=>t.completed).length;
+                const pending = l.tasks.length - done;
+                const overdue = l.tasks.filter(t => !t.completed && t.dueDate && new Date(t.dueDate) < new Date()).length;
+                const entityList = [...l.entities].map(e => e.toUpperCase()).join(', ');
+                return `
+                    <div class="lead-card">
+                        <div class="lead-header">
+                            <div class="lead-avatar" style="background:${colors[i%colors.length]}">${initials(l.name)}</div>
+                            <div class="lead-info"><h3>${esc(l.name)}</h3><div class="lead-role">${esc(l.role)} · ${entityList}</div></div>
+                            <div class="lead-stats">
+                                <div class="lead-stat"><div class="lead-stat-value" style="color:var(--accent-sky)">${pending}</div><div class="lead-stat-label">Pending</div></div>
+                                <div class="lead-stat"><div class="lead-stat-value" style="color:${overdue ? 'var(--accent-rose)' : 'var(--accent-emerald)'}">${overdue || done}</div><div class="lead-stat-label">${overdue ? 'Overdue' : 'Done'}</div></div>
+                            </div>
+                        </div>
+                        <div class="lead-tasks">${l.tasks.filter(t=>!t.completed).map(t=>`
+                            <div class="task-item priority-${t.priority}" style="border-left-color: ${t.entity === 'ief' ? 'var(--accent-teal)' : 'var(--accent-gold)'}">
+                                <div class="task-checkbox"></div>
+                                <div class="task-content">
+                                    <div class="lead-task-program"><span class="entity-badge ${t.entity}">${t.entity.toUpperCase()}</span> ${esc(t.programName)}</div>
+                                    <div class="task-title">${esc(t.name)}</div>
+                                    ${t.dueDate?`<div class="task-meta"><span class="task-due ${isOver(t.dueDate)?'overdue':''}">📅 ${fmtDate(t.dueDate)}</span></div>`:''}
+                                </div>
+                            </div>`).join('')}</div>
+                    </div>`;
+            }).join('')}</div>`;
+        }
+
+        function renderTimelineView(container, tasks) {
+            const upcoming = tasks.filter(t => t.dueDate && !t.completed).sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+            if (!upcoming.length) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>No deadlines</p></div>'; return; }
+            const byMonth = {};
+            upcoming.forEach(t => {
+                const d = new Date(t.dueDate);
+                const key = `${d.getFullYear()}-${d.getMonth()}`;
+                const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                if (!byMonth[key]) byMonth[key] = { label, tasks: [] };
+                byMonth[key].tasks.push(t);
+            });
+            container.innerHTML = `<div class="timeline-view">${Object.values(byMonth).map(m => `
+                <div class="timeline-month">
+                    <div class="timeline-month-header">${m.label}</div>
+                    ${m.tasks.map(t => {
+                        const d = new Date(t.dueDate);
+                        const over = d < new Date();
+                        return `<div class="timeline-item">
+                            <span class="timeline-item-date" style="${over?'color:var(--accent-rose)':''}">${d.getDate()}</span>
+                            <span class="timeline-item-entity ${t.entity}">${t.entity.toUpperCase()}</span>
+                            <span style="flex:1">${esc(t.name)}</span>
+                            <span style="color:var(--text-muted);font-size:0.6rem">${esc(t.assignee||'')}</span>
+                        </div>`;
+                    }).join('')}
+                </div>`).join('')}</div>`;
+        }
+
+        function renderTasksView(container, tasks) {
+            if (!tasks.length) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>No tasks</p></div>'; return; }
+            const sorted = [...tasks].sort((a,b) => {
+                if (a.completed !== b.completed) return a.completed ? 1 : -1;
+                if (a.dueDate && b.dueDate) return new Date(a.dueDate) - new Date(b.dueDate);
+                return a.dueDate ? -1 : 1;
+            });
+            container.innerHTML = `<div class="programs-grid">${sorted.map(t => `
+                <div class="task-item priority-${t.priority}" style="background:var(--bg-card);padding:0.75rem;border-left:3px solid ${t.entity==='ief'?'var(--accent-teal)':'var(--accent-gold)'}">
+                    <div class="task-checkbox ${t.completed?'completed':''}"></div>
+                    <div class="task-content">
+                        <div class="lead-task-program"><span class="entity-badge ${t.entity}">${t.entity.toUpperCase()}</span> ${esc(t.programName)}</div>
+                        <div class="task-title ${t.completed?'completed':''}">${esc(t.name)}</div>
+                        <div class="task-meta">
+                            ${t.assignee?`<span>👤 ${esc(t.assignee)}</span>`:''}
+                            ${t.dueDate?`<span class="task-due ${isOver(t.dueDate)&&!t.completed?'overdue':''}">📅 ${fmtDate(t.dueDate)}</span>`:''}
+                        </div>
+                    </div>
+                </div>`).join('')}</div>`;
+        }
+
+        function renderSidebar() {
+            // Deadlines
+            const container = document.getElementById('deadlines-list');
+            const badge = document.getElementById('deadline-count');
+            const upcoming = state.tasks.filter(t => t.dueDate && !t.completed).sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate)).slice(0, 6);
+            const overdueCount = upcoming.filter(t => new Date(t.dueDate) < new Date()).length;
+            badge.textContent = overdueCount || upcoming.length;
+            badge.style.background = overdueCount ? 'var(--accent-rose)' : 'var(--accent-gold)';
+            container.innerHTML = upcoming.length ? upcoming.map(t => {
+                const d = new Date(t.dueDate);
+                const over = d < new Date();
+                return `<div class="deadline-item ${over?'overdue':''}">
+                    <div class="deadline-date"><div class="deadline-day">${d.getDate()}</div><div class="deadline-month">${d.toLocaleDateString('en-US',{month:'short'})}</div></div>
+                    <div class="deadline-content"><div class="deadline-task">${esc(t.name)}</div><div class="deadline-meta">${esc(t.programName)} · ${esc(t.assignee||'')}</div></div>
+                </div>`;
+            }).join('') : '<p style="color:var(--text-muted);font-size:0.7rem;text-align:center">No deadlines</p>';
+            
+            // Workload
+            const wlContainer = document.getElementById('workload-list');
+            const wl = {};
+            state.tasks.forEach(t => {
+                if (!t.assignee) return;
+                if (!wl[t.assignee]) wl[t.assignee] = { total: 0, pending: 0 };
+                wl[t.assignee].total++;
+                if (!t.completed) wl[t.assignee].pending++;
+            });
+            const wlList = Object.entries(wl).map(([n,d]) => ({name:n,...d})).sort((a,b) => b.pending - a.pending).slice(0,5);
+            const maxP = Math.max(...wlList.map(w => w.pending), 1);
+            const colors = ['#d4a853', '#34d399', '#38bdf8', '#a78bfa', '#fb7185'];
+            wlContainer.innerHTML = wlList.length ? wlList.map((m,i) => {
+                const pct = (m.pending/maxP)*100;
+                const lvl = m.pending > 5 ? 'high' : m.pending > 2 ? 'medium' : 'low';
+                return `<div class="workload-item">
+                    <div class="workload-avatar" style="background:${colors[i%colors.length]}">${initials(m.name)}</div>
+                    <div class="workload-info"><div class="workload-name">${esc(m.name)}</div><div class="workload-tasks">${m.pending} pending</div></div>
+                    <div class="workload-bar"><div class="workload-fill ${lvl}" style="width:${pct}%"></div></div>
+                </div>`;
+            }).join('') : '<p style="color:var(--text-muted);font-size:0.7rem;text-align:center">No assignments</p>';
+        }
+
+        function toggleProject(id) {
+            document.querySelector(`[data-id="${id}"]`).classList.toggle('expanded');
+        }
+
+        // Utils
+        function esc(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+        function fmtDate(s) { if (!s) return '—'; const d = new Date(s); return isNaN(d) ? s : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+        function initials(n) { return n ? n.split(' ').map(x => x[0]).join('').toUpperCase().slice(0,2) : '?'; }
+        function isOver(s) { return s && new Date(s) < new Date(); }
+    </script>
+</body>
+</html>
