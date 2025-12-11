@@ -1021,27 +1021,12 @@
                     <span id="status-text">Not connected</span>
                 </div>
                 <button class="btn-icon" onclick="refreshData()" title="Refresh">↻</button>
-                <button class="btn btn-secondary" onclick="toggleSetup()">⚙️ Setup</button>
+                <button class="btn btn-secondary" onclick="loadData()">↻</button>
                 <a class="btn btn-primary" id="sheet-link" href="#" target="_blank" style="display: none;">📊 Sheet</a>
             </div>
         </header>
 
         <!-- Setup Panel -->
-        <div class="setup-panel" id="setup-panel">
-            <h2>📊 Connect Google Sheet</h2>
-            <div class="form-group">
-                <label class="form-label">Google Sheet ID</label>
-                <input type="text" class="form-input" id="sheet-id-input" placeholder="Your IPC+IEF Master Sheet ID">
-            </div>
-            <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: -0.5rem;">
-                Sheet needs tabs: Programs, Tasks, Team. Programs should have "Entity" column (IPC or IEF).
-            </p>
-            <div class="setup-actions">
-                <button class="btn btn-primary" onclick="connectSheet()">Connect</button>
-                <button class="btn btn-secondary" onclick="loadDemoData()">Load Demo</button>
-            </div>
-        </div>
-
         <!-- Entity Tabs -->
         <div class="entity-tabs" id="entity-tabs" style="display: none;">
             <button class="entity-tab active all" data-entity="all" onclick="filterEntity('all')">All Projects</button>
@@ -1170,15 +1155,15 @@
         <!-- Welcome State -->
         <div class="empty-state" id="welcome-state">
             <div class="empty-state-icon">📊</div>
-            <p>Connect your IPC + IEF Google Sheet</p>
-            <p style="font-size: 0.75rem; margin-top: 0.35rem;">Click Setup to connect or Load Demo to preview</p>
+            <p>Loading data...</p>
         </div>
     </div>
 
     <script>
         // State
         const CONFIG_KEY = 'ipc-ief-dashboard';
-        let config = { sheetId: localStorage.getItem(CONFIG_KEY) || '1_AAjePsJq1u2KlAWm8ol_0iQkK16_WJl' };
+        const DEFAULT_SHEET_ID = '1_AAjePsJq1u2KlAWm8ol_0iQkK16_WJl';
+        let config = { sheetId: DEFAULT_SHEET_ID };
         let state = {
             programs: [],
             tasks: [],
@@ -1190,16 +1175,12 @@
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('sheet-id-input').value = config.sheetId;
-            if (config.sheetId) connectSheet();
+            loadData(); // Auto-load from hardcoded Sheet ID
         });
 
         // Google Sheets
-        async function connectSheet() {
-            const sheetId = document.getElementById('sheet-id-input').value.trim();
-            if (!sheetId) return;
-            config.sheetId = sheetId;
-            localStorage.setItem(CONFIG_KEY, sheetId);
+        async function loadData() {
+            const sheetId = config.sheetId;
             updateStatus('connecting');
             try {
                 const [programs, tasks, team] = await Promise.all([
@@ -1215,11 +1196,10 @@
                 showDashboard();
                 document.getElementById('sheet-link').href = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
                 document.getElementById('sheet-link').style.display = 'flex';
-                document.getElementById('setup-panel').classList.remove('active');
             } catch (e) {
                 console.error(e);
                 updateStatus('error');
-                alert('Connection failed. Check Sheet ID and publish settings.');
+                alert('Connection failed. Check that the Google Sheet is published to web.');
             }
         }
 
@@ -1327,54 +1307,6 @@
         async function refreshData() { if (config.sheetId) await connectSheet(); }
 
         // Demo Data
-        function loadDemoData() {
-            state.programs = [
-                { id: 1, name: 'Music Teacher Income Planner', entity: 'ipc', lead: 'Alayna', team: ['Alayna'], startDate: '2024-11-15', endDate: '2024-12-15', status: 'completed', metrics: 'Launch on Etsy, $47 price point', tasks: [] },
-                { id: 2, name: 'Delivery Driver Optimizer', entity: 'ipc', lead: 'Alayna', team: ['Alayna'], startDate: '2024-12-01', endDate: '2024-12-20', status: 'on-track', metrics: 'Complete toolkit, Etsy listing', tasks: [] },
-                { id: 3, name: 'IEF Platform Build', entity: 'ief', lead: 'Emily', team: ['Emily', 'Alayna'], startDate: '2024-10-01', endDate: '2025-01-15', status: 'on-track', metrics: '3 tiers ($97-$997), 50 subscribers', tasks: [] },
-                { id: 4, name: 'In Reach Therapy Onboarding', entity: 'ief', lead: 'Emily', team: ['Emily'], startDate: '2024-12-01', endDate: '2024-12-31', status: 'on-track', metrics: 'Full ops setup, $4,500/mo retainer', tasks: [] },
-                { id: 5, name: 'Bearded Bookseller Press', entity: 'ipc', lead: 'Marcus', team: ['Marcus', 'Sarah', 'Alayna'], startDate: '2024-01-15', endDate: '2025-06-30', status: 'on-track', metrics: 'Launch 3 titles, $15K revenue', tasks: [] },
-                { id: 6, name: 'Central Oregon Volunteer Connect', entity: 'ipc', lead: 'Alayna', team: ['Alayna'], startDate: '2024-11-01', endDate: '2024-12-31', status: 'at-risk', metrics: 'Giving Tuesday campaign, 100 signups', tasks: [] }
-            ];
-            state.tasks = [
-                // Music Teacher (completed)
-                { id: 1, programName: 'Music Teacher Income Planner', name: 'Build calculator HTML', assignee: 'Alayna', dueDate: '2024-12-05', priority: 'high', completed: true },
-                { id: 2, programName: 'Music Teacher Income Planner', name: 'Create Etsy listing', assignee: 'Alayna', dueDate: '2024-12-10', priority: 'high', completed: true },
-                // Delivery Driver
-                { id: 3, programName: 'Delivery Driver Optimizer', name: 'Research gig platforms', assignee: 'Alayna', dueDate: '2024-12-08', priority: 'medium', completed: true },
-                { id: 4, programName: 'Delivery Driver Optimizer', name: 'Build expense tracker', assignee: 'Alayna', dueDate: '2024-12-12', priority: 'high', completed: false },
-                { id: 5, programName: 'Delivery Driver Optimizer', name: 'Create route optimizer', assignee: 'Alayna', dueDate: '2024-12-15', priority: 'high', completed: false },
-                { id: 6, programName: 'Delivery Driver Optimizer', name: 'Write listing copy', assignee: 'Alayna', dueDate: '2024-12-18', priority: 'medium', completed: false },
-                // IEF Platform
-                { id: 7, programName: 'IEF Platform Build', name: 'Complete Tier 1 resources', assignee: 'Emily', dueDate: '2024-12-15', priority: 'high', completed: false },
-                { id: 8, programName: 'IEF Platform Build', name: 'Set up payment processing', assignee: 'Emily', dueDate: '2024-12-20', priority: 'high', completed: false },
-                { id: 9, programName: 'IEF Platform Build', name: 'Create onboarding sequence', assignee: 'Alayna', dueDate: '2024-12-22', priority: 'medium', completed: false },
-                { id: 10, programName: 'IEF Platform Build', name: 'Build marketing page', assignee: 'Emily', dueDate: '2025-01-05', priority: 'medium', completed: false },
-                // In Reach
-                { id: 11, programName: 'In Reach Therapy Onboarding', name: 'Complete discovery call', assignee: 'Emily', dueDate: '2024-12-05', priority: 'high', completed: true },
-                { id: 12, programName: 'In Reach Therapy Onboarding', name: 'Create SOPs document', assignee: 'Emily', dueDate: '2024-12-12', priority: 'high', completed: false },
-                { id: 13, programName: 'In Reach Therapy Onboarding', name: 'Set up financial tracking', assignee: 'Emily', dueDate: '2024-12-18', priority: 'medium', completed: false },
-                // Bearded Bookseller
-                { id: 14, programName: 'Bearded Bookseller Press', name: 'Finalize Q1 cover designs', assignee: 'Sarah', dueDate: '2024-12-15', priority: 'high', completed: false },
-                { id: 15, programName: 'Bearded Bookseller Press', name: 'Complete ISBN registration', assignee: 'Marcus', dueDate: '2024-12-18', priority: 'high', completed: false },
-                { id: 16, programName: 'Bearded Bookseller Press', name: 'Set up distribution', assignee: 'Marcus', dueDate: '2024-12-22', priority: 'medium', completed: false },
-                // Volunteer Connect
-                { id: 17, programName: 'Central Oregon Volunteer Connect', name: 'Launch Giving Tuesday campaign', assignee: 'Alayna', dueDate: '2024-12-03', priority: 'high', completed: true },
-                { id: 18, programName: 'Central Oregon Volunteer Connect', name: 'Follow up with signups', assignee: 'Alayna', dueDate: '2024-12-10', priority: 'high', completed: false },
-                { id: 19, programName: 'Central Oregon Volunteer Connect', name: 'Create January calendar', assignee: 'Alayna', dueDate: '2024-12-20', priority: 'medium', completed: false }
-            ];
-            state.team = [
-                { id: 1, name: 'Alayna', role: 'CEO / Operations Lead', entity: 'both' },
-                { id: 2, name: 'Emily', role: 'Operations Partner', entity: 'ief' },
-                { id: 3, name: 'Marcus', role: 'Publisher', entity: 'ipc' },
-                { id: 4, name: 'Sarah', role: 'Creative Director', entity: 'ipc' }
-            ];
-            linkData();
-            updateStatus('connected');
-            showDashboard();
-            document.getElementById('setup-panel').classList.remove('active');
-        }
-
         // UI
         function updateStatus(s) {
             const dot = document.getElementById('status-dot');
@@ -1385,8 +1317,6 @@
             else if (s === 'error') { dot.classList.add('error'); txt.textContent = 'Error'; }
             else txt.textContent = 'Not connected';
         }
-
-        function toggleSetup() { document.getElementById('setup-panel').classList.toggle('active'); }
 
         function showDashboard() {
             document.getElementById('welcome-state').style.display = 'none';
