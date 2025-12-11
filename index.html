@@ -1265,13 +1265,20 @@
                     return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
                 };
                 const status = (get('status') || '').toLowerCase();
+                const assigneeRaw = get('assign') || get('owner') || '';
+                const assignees = assigneeRaw.split(',').map(a => a.trim()).filter(Boolean);
+                const categoryRaw = get('category') || get('type') || '';
+                const categories = categoryRaw.split(',').map(c => c.trim()).filter(Boolean);
                 return {
                     id: i + 1,
                     programName: get('program') || get('project'),
                     name: get('task') || get('name'),
-                    assignee: get('assign') || get('owner'),
+                    assignee: assignees.join(', '),
+                    assignees: assignees,
                     dueDate: get('due'),
                     priority: (get('priority') || 'medium').toLowerCase(),
+                    category: categories.join(', ') || 'Other',
+                    categories: categories,
                     completed: ['complete', 'completed', 'done'].includes(status),
                     entity: '' // Will be set from program
                 };
@@ -1286,13 +1293,16 @@
                     const idx = cols.findIndex(c => c.includes(col));
                     return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
                 };
+                const name = get('team name') || get('name');
+                if (!name) return null;
                 return {
                     id: i + 1,
-                    name: get('name'),
-                    role: get('role') || get('title'),
-                    entity: (get('entity') || 'both').toLowerCase()
+                    name: name,
+                    role: get('team role') || get('role') || get('title'),
+                    entity: (get('team entity') || get('entity') || 'both').toLowerCase(),
+                    contact: get('team contact') || get('contact') || get('email') || ''
                 };
-            }).filter(t => t.name);
+            }).filter(t => t && t.name);
         }
 
         function normalizeStatus(s) {
@@ -1453,7 +1463,7 @@
                 tasks = tasks.filter(t => leadProjects.includes(t.programName));
             }
             if (state.filters.assignee) {
-                tasks = tasks.filter(t => t.assignee === state.filters.assignee);
+                tasks = tasks.filter(t => t.assignees && t.assignees.includes(state.filters.assignee));
             }
             if (state.filters.status) programs = programs.filter(p => p.status === state.filters.status);
             if (state.filters.due) {
