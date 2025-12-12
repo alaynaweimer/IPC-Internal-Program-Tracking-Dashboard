@@ -1344,18 +1344,55 @@
         }
 
         function populateFilters() {
+            updateDependentFilters();
+        }
+        
+        function updateDependentFilters() {
+            // Get entity-filtered programs
+            let filteredPrograms = [...state.programs];
+            if (state.entityFilter !== 'all') {
+                filteredPrograms = filteredPrograms.filter(p => p.entity === state.entityFilter);
+            }
+            
+            // Get project-filtered programs
+            const selectedProject = document.getElementById('filter-program').value;
+            let projectFilteredPrograms = selectedProject 
+                ? filteredPrograms.filter(p => p.name === selectedProject)
+                : filteredPrograms;
+            
+            // Programs dropdown (filtered by entity)
             const progSelect = document.getElementById('filter-program');
-            progSelect.innerHTML = '<option value="">All</option>' + state.programs.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+            const currentProgram = progSelect.value;
+            progSelect.innerHTML = '<option value="">All</option>' + 
+                filteredPrograms.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+            if (filteredPrograms.some(p => p.name === currentProgram)) {
+                progSelect.value = currentProgram;
+            }
             
-            // Leads (project owners)
-            const leads = [...new Set(state.programs.map(p => p.lead).filter(Boolean))].sort();
+            // Leads - from filtered programs
+            const leads = [...new Set(projectFilteredPrograms.map(p => p.lead).filter(Boolean))].sort();
             const leadSelect = document.getElementById('filter-lead');
+            const currentLead = leadSelect.value;
             leadSelect.innerHTML = '<option value="">All</option>' + leads.map(l => `<option value="${l}">${l}</option>`).join('');
+            if (leads.includes(currentLead)) leadSelect.value = currentLead;
             
-            // Assignees (task assignees)
-            const assignees = [...new Set([...state.team.map(t => t.name), ...state.tasks.map(t => t.assignee).filter(Boolean)])].sort();
+            // Assignees - from filtered tasks
+            let filteredTasks = [...state.tasks];
+            if (state.entityFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(t => t.entity === state.entityFilter);
+            }
+            if (selectedProject) {
+                filteredTasks = filteredTasks.filter(t => t.programName === selectedProject);
+            }
+            
+            const assignees = [...new Set([
+                ...state.team.filter(t => state.entityFilter === 'all' || t.entity === 'both' || t.entity === state.entityFilter).map(t => t.name),
+                ...filteredTasks.flatMap(t => t.assignees || [t.assignee]).filter(Boolean)
+            ])].sort();
             const assigneeSelect = document.getElementById('filter-assignee');
+            const currentAssignee = assigneeSelect.value;
             assigneeSelect.innerHTML = '<option value="">All</option>' + assignees.map(a => `<option value="${a}">${a}</option>`).join('');
+            if (assignees.includes(currentAssignee)) assigneeSelect.value = currentAssignee;
         }
 
         function filterEntity(entity) {
@@ -1363,10 +1400,15 @@
             document.querySelectorAll('.entity-tab').forEach(t => {
                 t.classList.toggle('active', t.dataset.entity === entity);
             });
+            // Reset project filter when entity changes
+            document.getElementById('filter-program').value = '';
+            updateDependentFilters();
             applyFilters();
         }
 
         function applyFilters() {
+            const programChanged = state.filters.program !== document.getElementById('filter-program').value;
+            
             state.filters = {
                 program: document.getElementById('filter-program').value,
                 lead: document.getElementById('filter-lead').value,
@@ -1375,6 +1417,11 @@
                 due: document.getElementById('filter-due').value,
                 search: document.getElementById('search-input').value.toLowerCase()
             };
+            
+            if (programChanged) {
+                updateDependentFilters();
+            }
+            
             renderAll();
         }
 
@@ -1385,6 +1432,7 @@
             document.getElementById('filter-status').value = '';
             document.getElementById('filter-due').value = '';
             document.getElementById('search-input').value = '';
+            updateDependentFilters();
             applyFilters();
         }
 
