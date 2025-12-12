@@ -677,6 +677,32 @@
         .task-due.overdue { color: var(--accent-rose); font-weight: 600; }
         .task-due.soon { color: var(--accent-amber); }
 
+        .task-deliverables {
+            margin-top: 0.4rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .deliverable-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: linear-gradient(135deg, var(--accent-emerald), var(--accent-sky));
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.6rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .deliverable-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(52, 211, 153, 0.3);
+        }
+
         .expand-icon {
             color: var(--text-muted);
             transition: transform 0.3s ease;
@@ -1274,6 +1300,7 @@
                     category: categories.join(', ') || 'Other',
                     categories: categories,
                     completed: ['complete', 'completed', 'done'].includes(status),
+                    deliverables: get('deliverable') || get('link') || '',
                     entity: '' // Will be set from program
                 };
             }).filter(t => t.name);
@@ -1569,6 +1596,9 @@
         function renderTask(t) {
             const over = t.dueDate && !t.completed && new Date(t.dueDate) < new Date();
             const soon = t.dueDate && !t.completed && !over && (new Date(t.dueDate) - new Date()) < 3*24*60*60*1000;
+            const deliverableLinks = t.deliverables ? t.deliverables.split(',').map((link, i, arr) => 
+                `<a href="${esc(link.trim())}" target="_blank" class="deliverable-link">📎 ${arr.length > 1 ? 'Link ' + (i+1) : 'Deliverable'}</a>`
+            ).join(' ') : '';
             return `
                 <div class="task-item priority-${t.priority}">
                     <div class="task-checkbox ${t.completed?'completed':''}"></div>
@@ -1578,6 +1608,7 @@
                             ${t.assignee?`<span>👤 ${esc(t.assignee)}</span>`:''}
                             ${t.dueDate?`<span class="task-due ${over?'overdue':''} ${soon?'soon':''}">📅 ${fmtDate(t.dueDate)}${over?' (overdue)':''}</span>`:''}
                         </div>
+                        ${t.completed && deliverableLinks ? `<div class="task-deliverables">${deliverableLinks}</div>` : ''}
                     </div>
                 </div>`;
         }
@@ -1697,7 +1728,11 @@
                 if (a.dueDate && b.dueDate) return new Date(a.dueDate) - new Date(b.dueDate);
                 return a.dueDate ? -1 : 1;
             });
-            container.innerHTML = `<div class="programs-grid">${sorted.map(t => `
+            container.innerHTML = `<div class="programs-grid">${sorted.map(t => {
+                const deliverableLinks = t.deliverables ? t.deliverables.split(',').map((link, i, arr) => 
+                    `<a href="${esc(link.trim())}" target="_blank" class="deliverable-link">📎 ${arr.length > 1 ? 'Link ' + (i+1) : 'Deliverable'}</a>`
+                ).join(' ') : '';
+                return `
                 <div class="task-item priority-${t.priority}" style="background:var(--bg-card);padding:0.75rem;border-left:3px solid ${t.entity==='ief'?'var(--accent-teal)':'var(--accent-gold)'}">
                     <div class="task-checkbox ${t.completed?'completed':''}"></div>
                     <div class="task-content">
@@ -1707,8 +1742,10 @@
                             ${t.assignee?`<span>👤 ${esc(t.assignee)}</span>`:''}
                             ${t.dueDate?`<span class="task-due ${isOver(t.dueDate)&&!t.completed?'overdue':''}">📅 ${fmtDate(t.dueDate)}</span>`:''}
                         </div>
+                        ${t.completed && deliverableLinks ? `<div class="task-deliverables">${deliverableLinks}</div>` : ''}
                     </div>
-                </div>`).join('')}</div>`;
+                </div>`;
+            }).join('')}</div>`;
         }
 
         function renderSidebar() {
