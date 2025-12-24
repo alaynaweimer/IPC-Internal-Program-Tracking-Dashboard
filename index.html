@@ -164,67 +164,15 @@
             cursor: pointer;
         }
 
-        /* Setup Panel */
-        .setup-panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border-accent);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            display: none;
-        }
-
-        .setup-panel.active { display: block; }
-
-        .setup-panel h2 {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: var(--accent-gold);
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-bottom: 0.3rem;
-            text-transform: uppercase;
-        }
-
-        .form-input {
-            width: 100%;
-            max-width: 500px;
-            padding: 0.6rem 0.85rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 6px;
-            color: var(--text-primary);
-            font-size: 0.8rem;
-            font-family: 'DM Sans', sans-serif;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent-gold);
-        }
-
-        .setup-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        /* Entity Tabs */
-        .entity-tabs {
+        /* Client Tabs */
+        .client-tabs {
             display: flex;
             gap: 0.5rem;
             margin-bottom: 1rem;
+            flex-wrap: wrap;
         }
 
-        .entity-tab {
+        .client-tab {
             padding: 0.5rem 1rem;
             border-radius: 6px;
             font-size: 0.8rem;
@@ -236,24 +184,20 @@
             transition: all 0.2s ease;
         }
 
-        .entity-tab:hover { border-color: var(--accent-gold); }
+        .client-tab:hover { border-color: var(--accent-gold); }
 
-        .entity-tab.active.ipc {
+        .client-tab.active {
             background: linear-gradient(135deg, var(--accent-gold), var(--accent-amber));
             color: var(--bg-primary);
             border-color: transparent;
         }
 
-        .entity-tab.active.ief {
-            background: linear-gradient(135deg, var(--accent-teal), var(--accent-emerald));
-            color: var(--bg-primary);
-            border-color: transparent;
+        .client-tab.active.internal {
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-sky));
         }
 
-        .entity-tab.active.all {
-            background: linear-gradient(135deg, var(--accent-violet), var(--accent-sky));
-            color: var(--bg-primary);
-            border-color: transparent;
+        .client-tab.active.external {
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-emerald));
         }
 
         /* Filter Bar */
@@ -444,8 +388,9 @@
             border-color: var(--border-accent);
         }
 
-        .program-card.entity-ipc { border-left: 3px solid var(--accent-gold); }
-        .program-card.entity-ief { border-left: 3px solid var(--accent-teal); }
+        .program-card.client-ipc { border-left: 3px solid var(--accent-gold); }
+        .program-card.client-ief { border-left: 3px solid var(--accent-teal); }
+        .program-card.client-external { border-left: 3px solid var(--accent-violet); }
 
         .program-header {
             padding: 0.85rem 1rem;
@@ -465,7 +410,7 @@
             gap: 0.4rem;
         }
 
-        .entity-badge {
+        .client-badge {
             font-size: 0.55rem;
             padding: 0.15rem 0.4rem;
             border-radius: 3px;
@@ -473,8 +418,9 @@
             text-transform: uppercase;
         }
 
-        .entity-badge.ipc { background: rgba(212,168,83,0.2); color: var(--accent-gold); }
-        .entity-badge.ief { background: rgba(45,212,191,0.2); color: var(--accent-teal); }
+        .client-badge.ipc { background: rgba(212,168,83,0.2); color: var(--accent-gold); }
+        .client-badge.ief { background: rgba(45,212,191,0.2); color: var(--accent-teal); }
+        .client-badge.external { background: rgba(167,139,250,0.2); color: var(--accent-violet); }
 
         .program-lead {
             font-size: 0.75rem;
@@ -827,14 +773,15 @@
             min-width: 35px;
         }
 
-        .timeline-item-entity {
+        .timeline-item-client {
             font-size: 0.55rem;
             padding: 0.1rem 0.3rem;
             border-radius: 3px;
         }
 
-        .timeline-item-entity.ipc { background: rgba(212,168,83,0.2); color: var(--accent-gold); }
-        .timeline-item-entity.ief { background: rgba(45,212,191,0.2); color: var(--accent-teal); }
+        .timeline-item-client.ipc { background: rgba(212,168,83,0.2); color: var(--accent-gold); }
+        .timeline-item-client.ief { background: rgba(45,212,191,0.2); color: var(--accent-teal); }
+        .timeline-item-client.external { background: rgba(167,139,250,0.2); color: var(--accent-violet); }
 
         /* Sidebar */
         .sidebar {
@@ -963,36 +910,36 @@
         .workload-fill.medium { background: var(--accent-amber); }
         .workload-fill.high { background: var(--accent-rose); }
 
-        /* Entity Summary */
-        .entity-summary {
+        /* Client Summary */
+        .client-summary {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
             margin-bottom: 0.75rem;
         }
 
-        .entity-summary-card {
+        .client-summary-card {
             padding: 0.6rem 0.75rem;
             border-radius: 6px;
             border: 1px solid var(--border-subtle);
         }
 
-        .entity-summary-card.ipc { border-color: rgba(212,168,83,0.3); }
-        .entity-summary-card.ief { border-color: rgba(45,212,191,0.3); }
+        .client-summary-card.ipc { border-color: rgba(212,168,83,0.3); }
+        .client-summary-card.ief { border-color: rgba(45,212,191,0.3); }
 
-        .entity-summary-label {
+        .client-summary-label {
             font-size: 0.6rem;
             color: var(--text-muted);
             text-transform: uppercase;
         }
 
-        .entity-summary-value {
+        .client-summary-value {
             font-size: 1rem;
             font-weight: 700;
         }
 
-        .entity-summary-card.ipc .entity-summary-value { color: var(--accent-gold); }
-        .entity-summary-card.ief .entity-summary-value { color: var(--accent-teal); }
+        .client-summary-card.ipc .client-summary-value { color: var(--accent-gold); }
+        .client-summary-card.ief .client-summary-value { color: var(--accent-teal); }
 
         /* Empty State */
         .empty-state {
@@ -1038,7 +985,7 @@
                 </div>
                 <div>
                     <h1>Operations Hub</h1>
-                    <p class="header-subtitle">Ignite Positive Changes + IEF Fractional Services</p>
+                    <p class="header-subtitle">Ignite Positive Changes • All Operations</p>
                 </div>
             </div>
             <div class="header-actions">
@@ -1046,22 +993,22 @@
                     <span class="status-dot" id="status-dot"></span>
                     <span id="status-text">Not connected</span>
                 </div>
-                <button class="btn-icon" onclick="refreshData()" title="Refresh">↻</button>
-                <button class="btn btn-secondary" onclick="loadData()">↻</button>
+                <button class="btn-icon" onclick="loadData()" title="Refresh">↻</button>
                 <a class="btn btn-primary" id="sheet-link" href="#" target="_blank" style="display: none;">📊 Sheet</a>
             </div>
         </header>
 
-        <!-- Setup Panel -->
-        <!-- Entity Tabs -->
-        <div class="entity-tabs" id="entity-tabs" style="display: none;">
-            <button class="entity-tab active all" data-entity="all" onclick="filterEntity('all')">All Projects</button>
-            <button class="entity-tab ipc" data-entity="ipc" onclick="filterEntity('ipc')">IPC</button>
-            <button class="entity-tab ief" data-entity="ief" onclick="filterEntity('ief')">IEF</button>
-        </div>
+        <!-- Client Tabs -->
+        <div class="client-tabs" id="client-tabs" style="display: none;"></div>
 
         <!-- Filter Bar -->
         <div class="filter-bar" id="filter-bar" style="display: none;">
+            <div class="filter-group">
+                <span class="filter-label">Client</span>
+                <select class="filter-select" id="filter-client" onchange="applyFilters()">
+                    <option value="">All</option>
+                </select>
+            </div>
             <div class="filter-group">
                 <span class="filter-label">Project</span>
                 <select class="filter-select" id="filter-program" onchange="applyFilters()">
@@ -1109,10 +1056,11 @@
         <!-- View Tabs -->
         <div class="view-tabs" id="view-tabs" style="display: none;">
             <button class="view-tab active" data-view="projects" onclick="switchView('projects')">By Project</button>
+            <button class="view-tab" data-view="clients" onclick="switchView('clients')">By Client</button>
             <button class="view-tab" data-view="leads" onclick="switchView('leads')">By Lead</button>
             <button class="view-tab" data-view="assignees" onclick="switchView('assignees')">By Assignee</button>
             <button class="view-tab" data-view="tasks" onclick="switchView('tasks')">All Tasks</button>
-            <button class="view-tab" data-view="timeline" onclick="switchView('timeline')">By Timeline</button>
+            <button class="view-tab" data-view="timeline" onclick="switchView('timeline')">Timeline</button>
         </div>
 
         <!-- Metrics -->
@@ -1139,8 +1087,8 @@
                 <div class="metric-value" id="m-week">0</div>
             </div>
             <div class="metric-card teal">
-                <div class="metric-label">IEF Tasks</div>
-                <div class="metric-value" id="m-ief">0</div>
+                <div class="metric-label">Clients</div>
+                <div class="metric-value" id="m-clients">0</div>
             </div>
             <div class="metric-card violet">
                 <div class="metric-label">Team</div>
@@ -1163,14 +1111,14 @@
                     <div class="sidebar-header">
                         <h3>👥 Workload</h3>
                     </div>
-                    <div class="entity-summary">
-                        <div class="entity-summary-card ipc">
-                            <div class="entity-summary-label">IPC Tasks</div>
-                            <div class="entity-summary-value" id="ipc-task-count">0</div>
+                    <div class="client-summary">
+                        <div class="client-summary-card ipc">
+                            <div class="client-summary-label">IPC Tasks</div>
+                            <div class="client-summary-value" id="ipc-task-count">0</div>
                         </div>
-                        <div class="entity-summary-card ief">
-                            <div class="entity-summary-label">IEF Tasks</div>
-                            <div class="entity-summary-value" id="ief-task-count">0</div>
+                        <div class="client-summary-card ief">
+                            <div class="client-summary-label">IEF Tasks</div>
+                            <div class="client-summary-value" id="ief-task-count">0</div>
                         </div>
                     </div>
                     <div id="workload-list"></div>
@@ -1186,46 +1134,56 @@
     </div>
 
     <script>
-        // State
-        const CONFIG_KEY = 'ipc-ief-dashboard';
-        const DEFAULT_SHEET_ID = '1_AAjePsJq1u2KlAWm8ol_0iQkK16_WJl';
-        let config = { sheetId: DEFAULT_SHEET_ID };
+        // Configuration
+        const CONFIG = {
+            SHEET_ID: '1vZSLqWO88_GyscAqwVoeVLGwb6FT1JKMCxOR8maU-9I',
+            PROGRAMS_TAB: 'Programs',
+            TASKS_TAB: 'Tasks',
+            TEAM_TAB: 'Team',
+            INTERNAL_CLIENTS: ['IPC', 'IEF']
+        };
+
         let state = {
             programs: [],
             tasks: [],
             team: [],
+            clients: [],
             currentView: 'projects',
-            entityFilter: 'all',
-            filters: { program: '', lead: '', status: '', due: '', search: '' }
+            clientFilter: 'all',
+            filters: { client: '', program: '', lead: '', assignee: '', status: '', due: '', search: '' }
         };
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
-            loadData(); // Auto-load from hardcoded Sheet ID
+            loadData();
         });
 
-        // Google Sheets
+        // Google Sheets API
         async function loadData() {
-            const sheetId = config.sheetId;
             updateStatus('connecting');
             try {
                 const [programs, tasks, team] = await Promise.all([
-                    fetchSheet(sheetId, 'Programs'),
-                    fetchSheet(sheetId, 'Tasks'),
-                    fetchSheet(sheetId, 'Team')
+                    fetchSheet(CONFIG.SHEET_ID, CONFIG.PROGRAMS_TAB),
+                    fetchSheet(CONFIG.SHEET_ID, CONFIG.TASKS_TAB),
+                    fetchSheet(CONFIG.SHEET_ID, CONFIG.TEAM_TAB)
                 ]);
                 state.programs = parsePrograms(programs);
                 state.tasks = parseTasks(tasks);
                 state.team = parseTeam(team);
+                state.clients = [...new Set(state.programs.map(p => p.client).filter(Boolean))].sort();
                 linkData();
                 updateStatus('connected');
                 showDashboard();
-                document.getElementById('sheet-link').href = `https://docs.google.com/spreadsheets/d/${sheetId}/edit`;
+                document.getElementById('sheet-link').href = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/edit`;
                 document.getElementById('sheet-link').style.display = 'flex';
             } catch (e) {
                 console.error(e);
                 updateStatus('error');
-                alert('Connection failed. Check that the Google Sheet is published to web.');
+                document.getElementById('welcome-state').innerHTML = `
+                    <div class="empty-state-icon">❌</div>
+                    <p>Connection failed. Check that the Google Sheet is published to web.</p>
+                    <p style="font-size:0.7rem;margin-top:0.5rem;color:var(--accent-rose)">${e.message}</p>
+                `;
             }
         }
 
@@ -1239,12 +1197,10 @@
         }
 
         function getHeaders(table) {
-            // Check if column labels exist
             const colLabels = table.cols.map(c => (c.label || '').toLowerCase()).filter(Boolean);
             if (colLabels.length > 0) {
                 return { headers: table.cols.map(c => (c.label || '').toLowerCase()), dataRows: table.rows };
             }
-            // Use first row as headers
             if (table.rows && table.rows.length > 0) {
                 const headers = table.rows[0].c.map(cell => (cell && cell.v ? String(cell.v) : '').toLowerCase());
                 return { headers, dataRows: table.rows.slice(1) };
@@ -1260,10 +1216,12 @@
                     const idx = headers.findIndex(c => c.includes(col));
                     return idx >= 0 && row.c[idx] ? (row.c[idx].v || row.c[idx].f || '') : '';
                 };
+                const client = get('client') || 'IPC';
                 return {
                     id: i + 1,
                     name: get('program') || get('project') || get('name'),
-                    entity: (get('entity') || 'ipc').toLowerCase(),
+                    client: client,
+                    clientType: CONFIG.INTERNAL_CLIENTS.includes(client.toUpperCase()) ? 'internal' : 'external',
                     lead: get('lead') || get('owner'),
                     team: (get('team') || '').split(',').map(s => s.trim()).filter(Boolean),
                     startDate: get('start'),
@@ -1289,8 +1247,11 @@
                 const assignees = assigneeRaw.split(',').map(a => a.trim()).filter(Boolean);
                 const categoryRaw = get('category') || get('type') || '';
                 const categories = categoryRaw.split(',').map(c => c.trim()).filter(Boolean);
+                const client = get('client') || '';
                 return {
                     id: i + 1,
+                    client: client,
+                    clientType: CONFIG.INTERNAL_CLIENTS.includes(client.toUpperCase()) ? 'internal' : 'external',
                     programName: get('program') || get('project'),
                     name: get('task') || get('name'),
                     assignee: assignees.join(', '),
@@ -1300,8 +1261,7 @@
                     category: categories.join(', ') || 'Other',
                     categories: categories,
                     completed: ['complete', 'completed', 'done'].includes(status),
-                    deliverables: get('deliverable') || get('link') || '',
-                    entity: '' // Will be set from program
+                    deliverables: get('deliverable') || get('link') || ''
                 };
             }).filter(t => t.name);
         }
@@ -1320,7 +1280,6 @@
                     id: i + 1,
                     name: name,
                     role: get('team role') || get('role') || get('title'),
-                    entity: (get('team entity') || get('entity') || 'both').toLowerCase(),
                     contact: get('team contact') || get('contact') || get('email') || ''
                 };
             }).filter(t => t && t.name);
@@ -1340,14 +1299,17 @@
 
         function linkData() {
             state.programs.forEach(p => {
-                p.tasks = state.tasks.filter(t => t.programName.toLowerCase() === p.name.toLowerCase());
-                p.tasks.forEach(t => t.entity = p.entity);
+                p.tasks = state.tasks.filter(t => 
+                    t.programName && p.name && 
+                    t.programName.toLowerCase() === p.name.toLowerCase()
+                );
+                p.tasks.forEach(t => {
+                    if (!t.client) t.client = p.client;
+                    t.clientType = p.clientType;
+                });
             });
         }
 
-        async function refreshData() { if (config.sheetId) await connectSheet(); }
-
-        // Demo Data
         // UI
         function updateStatus(s) {
             const dot = document.getElementById('status-dot');
@@ -1361,13 +1323,42 @@
 
         function showDashboard() {
             document.getElementById('welcome-state').style.display = 'none';
-            document.getElementById('entity-tabs').style.display = 'flex';
+            document.getElementById('client-tabs').style.display = 'flex';
             document.getElementById('filter-bar').style.display = 'flex';
             document.getElementById('view-tabs').style.display = 'flex';
             document.getElementById('metrics-grid').style.display = 'grid';
             document.getElementById('main-content').style.display = 'grid';
+            buildClientTabs();
             populateFilters();
             renderAll();
+        }
+
+        function buildClientTabs() {
+            const container = document.getElementById('client-tabs');
+            let html = `<button class="client-tab active" data-client="all" onclick="filterByClientTab('all')">All Projects</button>`;
+            
+            // Add IPC and IEF tabs
+            html += `<button class="client-tab" data-client="IPC" onclick="filterByClientTab('IPC')">IPC</button>`;
+            html += `<button class="client-tab" data-client="IEF" onclick="filterByClientTab('IEF')">IEF</button>`;
+            
+            // Add external clients
+            const externalClients = state.clients.filter(c => !CONFIG.INTERNAL_CLIENTS.includes(c.toUpperCase()));
+            if (externalClients.length > 0) {
+                html += `<button class="client-tab" data-client="external" onclick="filterByClientTab('external')">External Clients</button>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function filterByClientTab(client) {
+            state.clientFilter = client;
+            document.querySelectorAll('.client-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.client === client);
+            });
+            document.getElementById('filter-program').value = '';
+            document.getElementById('filter-client').value = '';
+            updateDependentFilters();
+            applyFilters();
         }
 
         function populateFilters() {
@@ -1375,19 +1366,31 @@
         }
         
         function updateDependentFilters() {
-            // Get entity-filtered programs
             let filteredPrograms = [...state.programs];
-            if (state.entityFilter !== 'all') {
-                filteredPrograms = filteredPrograms.filter(p => p.entity === state.entityFilter);
+            
+            // Apply client tab filter
+            if (state.clientFilter === 'IPC') {
+                filteredPrograms = filteredPrograms.filter(p => p.client.toUpperCase() === 'IPC');
+            } else if (state.clientFilter === 'IEF') {
+                filteredPrograms = filteredPrograms.filter(p => p.client.toUpperCase() === 'IEF');
+            } else if (state.clientFilter === 'external') {
+                filteredPrograms = filteredPrograms.filter(p => !CONFIG.INTERNAL_CLIENTS.includes(p.client.toUpperCase()));
             }
             
-            // Get project-filtered programs
-            const selectedProject = document.getElementById('filter-program').value;
-            let projectFilteredPrograms = selectedProject 
-                ? filteredPrograms.filter(p => p.name === selectedProject)
-                : filteredPrograms;
+            // Client dropdown
+            const clients = [...new Set(filteredPrograms.map(p => p.client).filter(Boolean))].sort();
+            const clientSelect = document.getElementById('filter-client');
+            const currentClient = clientSelect.value;
+            clientSelect.innerHTML = '<option value="">All</option>' + clients.map(c => `<option value="${c}">${c}</option>`).join('');
+            if (clients.includes(currentClient)) clientSelect.value = currentClient;
             
-            // Programs dropdown (filtered by entity)
+            // Further filter by selected client dropdown
+            const selectedClient = document.getElementById('filter-client').value;
+            if (selectedClient) {
+                filteredPrograms = filteredPrograms.filter(p => p.client === selectedClient);
+            }
+            
+            // Programs dropdown
             const progSelect = document.getElementById('filter-program');
             const currentProgram = progSelect.value;
             progSelect.innerHTML = '<option value="">All</option>' + 
@@ -1396,24 +1399,37 @@
                 progSelect.value = currentProgram;
             }
             
-            // Leads - from filtered programs
+            // Get project-filtered programs
+            const selectedProject = document.getElementById('filter-program').value;
+            let projectFilteredPrograms = selectedProject 
+                ? filteredPrograms.filter(p => p.name === selectedProject)
+                : filteredPrograms;
+            
+            // Leads
             const leads = [...new Set(projectFilteredPrograms.map(p => p.lead).filter(Boolean))].sort();
             const leadSelect = document.getElementById('filter-lead');
             const currentLead = leadSelect.value;
             leadSelect.innerHTML = '<option value="">All</option>' + leads.map(l => `<option value="${l}">${l}</option>`).join('');
             if (leads.includes(currentLead)) leadSelect.value = currentLead;
             
-            // Assignees - from filtered tasks
+            // Assignees
             let filteredTasks = [...state.tasks];
-            if (state.entityFilter !== 'all') {
-                filteredTasks = filteredTasks.filter(t => t.entity === state.entityFilter);
+            if (state.clientFilter === 'IPC') {
+                filteredTasks = filteredTasks.filter(t => t.client.toUpperCase() === 'IPC');
+            } else if (state.clientFilter === 'IEF') {
+                filteredTasks = filteredTasks.filter(t => t.client.toUpperCase() === 'IEF');
+            } else if (state.clientFilter === 'external') {
+                filteredTasks = filteredTasks.filter(t => !CONFIG.INTERNAL_CLIENTS.includes(t.client.toUpperCase()));
+            }
+            if (selectedClient) {
+                filteredTasks = filteredTasks.filter(t => t.client === selectedClient);
             }
             if (selectedProject) {
                 filteredTasks = filteredTasks.filter(t => t.programName === selectedProject);
             }
             
             const assignees = [...new Set([
-                ...state.team.filter(t => state.entityFilter === 'all' || t.entity === 'both' || t.entity === state.entityFilter).map(t => t.name),
+                ...state.team.map(t => t.name),
                 ...filteredTasks.flatMap(t => t.assignees || [t.assignee]).filter(Boolean)
             ])].sort();
             const assigneeSelect = document.getElementById('filter-assignee');
@@ -1422,21 +1438,12 @@
             if (assignees.includes(currentAssignee)) assigneeSelect.value = currentAssignee;
         }
 
-        function filterEntity(entity) {
-            state.entityFilter = entity;
-            document.querySelectorAll('.entity-tab').forEach(t => {
-                t.classList.toggle('active', t.dataset.entity === entity);
-            });
-            // Reset project filter when entity changes
-            document.getElementById('filter-program').value = '';
-            updateDependentFilters();
-            applyFilters();
-        }
-
         function applyFilters() {
             const programChanged = state.filters.program !== document.getElementById('filter-program').value;
+            const clientChanged = state.filters.client !== document.getElementById('filter-client').value;
             
             state.filters = {
+                client: document.getElementById('filter-client').value,
                 program: document.getElementById('filter-program').value,
                 lead: document.getElementById('filter-lead').value,
                 assignee: document.getElementById('filter-assignee').value,
@@ -1445,7 +1452,7 @@
                 search: document.getElementById('search-input').value.toLowerCase()
             };
             
-            if (programChanged) {
+            if (programChanged || clientChanged) {
                 updateDependentFilters();
             }
             
@@ -1453,6 +1460,7 @@
         }
 
         function clearFilters() {
+            document.getElementById('filter-client').value = '';
             document.getElementById('filter-program').value = '';
             document.getElementById('filter-lead').value = '';
             document.getElementById('filter-assignee').value = '';
@@ -1466,10 +1474,23 @@
         function getFilteredData() {
             let programs = [...state.programs];
             let tasks = [...state.tasks];
-            // Entity filter
-            if (state.entityFilter !== 'all') {
-                programs = programs.filter(p => p.entity === state.entityFilter);
-                tasks = tasks.filter(t => t.entity === state.entityFilter);
+            
+            // Client tab filter
+            if (state.clientFilter === 'IPC') {
+                programs = programs.filter(p => p.client.toUpperCase() === 'IPC');
+                tasks = tasks.filter(t => t.client.toUpperCase() === 'IPC');
+            } else if (state.clientFilter === 'IEF') {
+                programs = programs.filter(p => p.client.toUpperCase() === 'IEF');
+                tasks = tasks.filter(t => t.client.toUpperCase() === 'IEF');
+            } else if (state.clientFilter === 'external') {
+                programs = programs.filter(p => !CONFIG.INTERNAL_CLIENTS.includes(p.client.toUpperCase()));
+                tasks = tasks.filter(t => !CONFIG.INTERNAL_CLIENTS.includes(t.client.toUpperCase()));
+            }
+            
+            // Dropdown filters
+            if (state.filters.client) {
+                programs = programs.filter(p => p.client === state.filters.client);
+                tasks = tasks.filter(t => t.client === state.filters.client);
             }
             if (state.filters.program) {
                 programs = programs.filter(p => p.name === state.filters.program);
@@ -1477,7 +1498,6 @@
             }
             if (state.filters.lead) {
                 programs = programs.filter(p => p.lead === state.filters.lead);
-                // Only show tasks from projects owned by this lead
                 const leadProjects = programs.map(p => p.name);
                 tasks = tasks.filter(t => leadProjects.includes(t.programName));
             }
@@ -1500,8 +1520,8 @@
             }
             if (state.filters.search) {
                 const s = state.filters.search;
-                tasks = tasks.filter(t => t.name.toLowerCase().includes(s) || (t.assignee||'').toLowerCase().includes(s));
-                programs = programs.filter(p => p.name.toLowerCase().includes(s) || (p.lead||'').toLowerCase().includes(s));
+                tasks = tasks.filter(t => t.name.toLowerCase().includes(s) || (t.assignee||'').toLowerCase().includes(s) || (t.client||'').toLowerCase().includes(s));
+                programs = programs.filter(p => p.name.toLowerCase().includes(s) || (p.lead||'').toLowerCase().includes(s) || (p.client||'').toLowerCase().includes(s));
             }
             programs.forEach(p => { p.tasks = tasks.filter(t => t.programName === p.name); });
             return { programs, tasks };
@@ -1526,8 +1546,9 @@
             const overdue = tasks.filter(t => !t.completed && t.dueDate && new Date(t.dueDate) < new Date()).length;
             const week = new Date(); week.setDate(week.getDate() + 7);
             const dueWeek = tasks.filter(t => !t.completed && t.dueDate && new Date(t.dueDate) >= new Date() && new Date(t.dueDate) <= week).length;
-            const iefTasks = state.tasks.filter(t => t.entity === 'ief' && !t.completed).length;
-            const ipcTasks = state.tasks.filter(t => t.entity === 'ipc' && !t.completed).length;
+            const clientCount = [...new Set(programs.map(p => p.client))].length;
+            const iefTasks = state.tasks.filter(t => t.client.toUpperCase() === 'IEF' && !t.completed).length;
+            const ipcTasks = state.tasks.filter(t => t.client.toUpperCase() === 'IPC' && !t.completed).length;
             
             document.getElementById('m-projects').textContent = programs.filter(p => p.status !== 'completed').length;
             document.getElementById('m-complete').textContent = complete;
@@ -1535,7 +1556,7 @@
             document.getElementById('m-progress').textContent = progress;
             document.getElementById('m-overdue').textContent = overdue;
             document.getElementById('m-week').textContent = dueWeek;
-            document.getElementById('m-ief').textContent = iefTasks;
+            document.getElementById('m-clients').textContent = clientCount;
             document.getElementById('m-team').textContent = [...new Set(tasks.map(t => t.assignee).filter(Boolean))].length;
             document.getElementById('ipc-task-count').textContent = ipcTasks;
             document.getElementById('ief-task-count').textContent = iefTasks;
@@ -1545,6 +1566,7 @@
             const container = document.getElementById('content-area');
             const { programs, tasks } = getFilteredData();
             if (state.currentView === 'projects') renderProjectsView(container, programs);
+            else if (state.currentView === 'clients') renderClientsView(container, programs, tasks);
             else if (state.currentView === 'leads') renderLeadsView(container, programs, tasks);
             else if (state.currentView === 'assignees') renderAssigneesView(container, tasks);
             else if (state.currentView === 'timeline') renderTimelineView(container, tasks);
@@ -1556,17 +1578,25 @@
             container.innerHTML = `<div class="programs-grid">${programs.map(renderProjectCard).join('')}</div>`;
         }
 
+        function getClientClass(client) {
+            const c = (client || '').toUpperCase();
+            if (c === 'IPC') return 'ipc';
+            if (c === 'IEF') return 'ief';
+            return 'external';
+        }
+
         function renderProjectCard(p) {
             const done = p.tasks.filter(t => t.completed).length;
             const total = p.tasks.length;
             const pct = total ? Math.round(done/total*100) : 0;
             const statusLabels = { 'planning': 'Planning', 'on-track': 'On Track', 'at-risk': 'At Risk', 'on-hold': 'On Hold', 'completed': 'Completed' };
             const colors = ['#d4a853', '#34d399', '#38bdf8', '#a78bfa', '#fb7185'];
+            const clientClass = getClientClass(p.client);
             return `
-                <div class="program-card entity-${p.entity}" data-id="${p.id}">
+                <div class="program-card client-${clientClass}" data-id="${p.id}">
                     <div class="program-header" onclick="toggleProject(${p.id})">
                         <div class="program-title-section">
-                            <h3><span class="entity-badge ${p.entity}">${p.entity.toUpperCase()}</span> ${esc(p.name)} <span class="program-status status-${p.status}">${statusLabels[p.status]}</span></h3>
+                            <h3><span class="client-badge ${clientClass}">${esc(p.client)}</span> ${esc(p.name)} <span class="program-status status-${p.status}">${statusLabels[p.status]}</span></h3>
                             <div class="program-lead"><span class="avatar" style="background:${colors[0]}">${initials(p.lead)}</span>${esc(p.lead||'Unassigned')} · Lead</div>
                         </div>
                         <div class="program-meta">
@@ -1613,16 +1643,52 @@
                 </div>`;
         }
 
+        function renderClientsView(container, programs, tasks) {
+            const clientGroups = {};
+            programs.forEach(p => {
+                if (!clientGroups[p.client]) {
+                    clientGroups[p.client] = { name: p.client, programs: [], clientType: p.clientType };
+                }
+                clientGroups[p.client].programs.push(p);
+            });
+            const list = Object.values(clientGroups).sort((a,b) => a.name.localeCompare(b.name));
+            if (!list.length) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏢</div><p>No clients found</p></div>'; return; }
+            
+            container.innerHTML = `<div class="lead-grid">${list.map(c => {
+                const totalTasks = c.programs.reduce((sum, p) => sum + p.tasks.length, 0);
+                const doneTasks = c.programs.reduce((sum, p) => sum + p.tasks.filter(t => t.completed).length, 0);
+                const clientClass = getClientClass(c.name);
+                return `
+                    <div class="lead-card">
+                        <div class="lead-header">
+                            <div class="lead-avatar" style="background:${clientClass === 'ipc' ? 'var(--accent-gold)' : clientClass === 'ief' ? 'var(--accent-teal)' : 'var(--accent-violet)'}">${initials(c.name)}</div>
+                            <div class="lead-info"><h3>${esc(c.name)}</h3><div class="lead-role">${c.clientType === 'internal' ? 'Internal' : 'External Client'}</div></div>
+                            <div class="lead-stats">
+                                <div class="lead-stat"><div class="lead-stat-value" style="color:var(--accent-gold)">${c.programs.length}</div><div class="lead-stat-label">Projects</div></div>
+                                <div class="lead-stat"><div class="lead-stat-value" style="color:var(--accent-sky)">${totalTasks - doneTasks}</div><div class="lead-stat-label">Pending</div></div>
+                            </div>
+                        </div>
+                        <div class="lead-tasks">${c.programs.map(p=>`
+                            <div class="task-item" style="border-left-color: var(--accent-${clientClass === 'ipc' ? 'gold' : clientClass === 'ief' ? 'teal' : 'violet'})">
+                                <div class="task-content">
+                                    <div class="lead-task-program">${esc(p.name)}</div>
+                                    <div class="task-meta"><span class="program-status status-${p.status}">${p.status}</span> · ${p.tasks.filter(t=>t.completed).length}/${p.tasks.length} tasks</div>
+                                </div>
+                            </div>`).join('')}</div>
+                    </div>`;
+            }).join('')}</div>`;
+        }
+
         function renderLeadsView(container, programs, tasks) {
             const leads = {};
             programs.forEach(p => {
                 if (!p.lead) return;
                 if (!leads[p.lead]) {
                     const tm = state.team.find(m => m.name === p.lead);
-                    leads[p.lead] = { name: p.lead, role: tm?.role || 'Project Lead', programs: [], entities: new Set() };
+                    leads[p.lead] = { name: p.lead, role: tm?.role || 'Project Lead', programs: [], clients: new Set() };
                 }
                 leads[p.lead].programs.push(p);
-                leads[p.lead].entities.add(p.entity);
+                leads[p.lead].clients.add(p.client);
             });
             const list = Object.values(leads).sort((a,b) => b.programs.length - a.programs.length);
             if (!list.length) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>No project leads found</p></div>'; return; }
@@ -1630,24 +1696,27 @@
             container.innerHTML = `<div class="lead-grid">${list.map((l,i) => {
                 const totalTasks = l.programs.reduce((sum, p) => sum + p.tasks.length, 0);
                 const doneTasks = l.programs.reduce((sum, p) => sum + p.tasks.filter(t => t.completed).length, 0);
-                const entityList = [...l.entities].map(e => e.toUpperCase()).join(', ');
+                const clientList = [...l.clients].join(', ');
                 return `
                     <div class="lead-card">
                         <div class="lead-header">
                             <div class="lead-avatar" style="background:${colors[i%colors.length]}">${initials(l.name)}</div>
-                            <div class="lead-info"><h3>${esc(l.name)}</h3><div class="lead-role">${esc(l.role)} · ${entityList}</div></div>
+                            <div class="lead-info"><h3>${esc(l.name)}</h3><div class="lead-role">${esc(l.role)}</div></div>
                             <div class="lead-stats">
                                 <div class="lead-stat"><div class="lead-stat-value" style="color:var(--accent-gold)">${l.programs.length}</div><div class="lead-stat-label">Projects</div></div>
                                 <div class="lead-stat"><div class="lead-stat-value" style="color:var(--accent-sky)">${totalTasks - doneTasks}</div><div class="lead-stat-label">Pending</div></div>
                             </div>
                         </div>
-                        <div class="lead-tasks">${l.programs.map(p=>`
-                            <div class="task-item" style="border-left-color: ${p.entity === 'ief' ? 'var(--accent-teal)' : 'var(--accent-gold)'}">
+                        <div class="lead-tasks">${l.programs.map(p=>{
+                            const clientClass = getClientClass(p.client);
+                            return `
+                            <div class="task-item" style="border-left-color: var(--accent-${clientClass === 'ipc' ? 'gold' : clientClass === 'ief' ? 'teal' : 'violet'})">
                                 <div class="task-content">
-                                    <div class="lead-task-program"><span class="entity-badge ${p.entity}">${p.entity.toUpperCase()}</span> ${esc(p.name)}</div>
-                                    <div class="task-meta"><span class="status-badge status-${p.status}">${p.status}</span> · ${p.tasks.filter(t=>t.completed).length}/${p.tasks.length} tasks</div>
+                                    <div class="lead-task-program"><span class="client-badge ${clientClass}">${esc(p.client)}</span> ${esc(p.name)}</div>
+                                    <div class="task-meta"><span class="program-status status-${p.status}">${p.status}</span> · ${p.tasks.filter(t=>t.completed).length}/${p.tasks.length} tasks</div>
                                 </div>
-                            </div>`).join('')}</div>
+                            </div>`;
+                        }).join('')}</div>
                     </div>`;
             }).join('')}</div>`;
         }
@@ -1658,10 +1727,10 @@
                 if (!t.assignee) return;
                 if (!assignees[t.assignee]) {
                     const tm = state.team.find(m => m.name === t.assignee);
-                    assignees[t.assignee] = { name: t.assignee, role: tm?.role || '', tasks: [], entities: new Set() };
+                    assignees[t.assignee] = { name: t.assignee, role: tm?.role || '', tasks: [], clients: new Set() };
                 }
                 assignees[t.assignee].tasks.push(t);
-                assignees[t.assignee].entities.add(t.entity);
+                assignees[t.assignee].clients.add(t.client);
             });
             const list = Object.values(assignees).sort((a,b) => b.tasks.filter(t=>!t.completed).length - a.tasks.filter(t=>!t.completed).length);
             if (!list.length) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>No task assignments</p></div>'; return; }
@@ -1670,26 +1739,28 @@
                 const done = l.tasks.filter(t=>t.completed).length;
                 const pending = l.tasks.length - done;
                 const overdue = l.tasks.filter(t => !t.completed && t.dueDate && new Date(t.dueDate) < new Date()).length;
-                const entityList = [...l.entities].map(e => e.toUpperCase()).join(', ');
                 return `
                     <div class="lead-card">
                         <div class="lead-header">
                             <div class="lead-avatar" style="background:${colors[i%colors.length]}">${initials(l.name)}</div>
-                            <div class="lead-info"><h3>${esc(l.name)}</h3><div class="lead-role">${esc(l.role)} · ${entityList}</div></div>
+                            <div class="lead-info"><h3>${esc(l.name)}</h3><div class="lead-role">${esc(l.role)}</div></div>
                             <div class="lead-stats">
                                 <div class="lead-stat"><div class="lead-stat-value" style="color:var(--accent-sky)">${pending}</div><div class="lead-stat-label">Pending</div></div>
                                 <div class="lead-stat"><div class="lead-stat-value" style="color:${overdue ? 'var(--accent-rose)' : 'var(--accent-emerald)'}">${overdue || done}</div><div class="lead-stat-label">${overdue ? 'Overdue' : 'Done'}</div></div>
                             </div>
                         </div>
-                        <div class="lead-tasks">${l.tasks.filter(t=>!t.completed).map(t=>`
-                            <div class="task-item priority-${t.priority}" style="border-left-color: ${t.entity === 'ief' ? 'var(--accent-teal)' : 'var(--accent-gold)'}">
+                        <div class="lead-tasks">${l.tasks.filter(t=>!t.completed).map(t=>{
+                            const clientClass = getClientClass(t.client);
+                            return `
+                            <div class="task-item priority-${t.priority}" style="border-left-color: var(--accent-${clientClass === 'ipc' ? 'gold' : clientClass === 'ief' ? 'teal' : 'violet'})">
                                 <div class="task-checkbox"></div>
                                 <div class="task-content">
-                                    <div class="lead-task-program"><span class="entity-badge ${t.entity}">${t.entity.toUpperCase()}</span> ${esc(t.programName)}</div>
+                                    <div class="lead-task-program"><span class="client-badge ${clientClass}">${esc(t.client)}</span> ${esc(t.programName)}</div>
                                     <div class="task-title">${esc(t.name)}</div>
                                     ${t.dueDate?`<div class="task-meta"><span class="task-due ${isOver(t.dueDate)?'overdue':''}">📅 ${fmtDate(t.dueDate)}</span></div>`:''}
                                 </div>
-                            </div>`).join('')}</div>
+                            </div>`;
+                        }).join('')}</div>
                     </div>`;
             }).join('')}</div>`;
         }
@@ -1711,9 +1782,10 @@
                     ${m.tasks.map(t => {
                         const d = new Date(t.dueDate);
                         const over = d < new Date();
+                        const clientClass = getClientClass(t.client);
                         return `<div class="timeline-item">
                             <span class="timeline-item-date" style="${over?'color:var(--accent-rose)':''}">${d.getDate()}</span>
-                            <span class="timeline-item-entity ${t.entity}">${t.entity.toUpperCase()}</span>
+                            <span class="timeline-item-client ${clientClass}">${esc(t.client)}</span>
                             <span style="flex:1">${esc(t.name)}</span>
                             <span style="color:var(--text-muted);font-size:0.6rem">${esc(t.assignee||'')}</span>
                         </div>`;
@@ -1732,11 +1804,12 @@
                 const deliverableLinks = t.deliverables ? t.deliverables.split(',').map((link, i, arr) => 
                     `<a href="${esc(link.trim())}" target="_blank" class="deliverable-link">📎 ${arr.length > 1 ? 'Link ' + (i+1) : 'Deliverable'}</a>`
                 ).join(' ') : '';
+                const clientClass = getClientClass(t.client);
                 return `
-                <div class="task-item priority-${t.priority}" style="background:var(--bg-card);padding:0.75rem;border-left:3px solid ${t.entity==='ief'?'var(--accent-teal)':'var(--accent-gold)'}">
+                <div class="task-item priority-${t.priority}" style="background:var(--bg-card);padding:0.75rem;border-left:3px solid var(--accent-${clientClass === 'ipc' ? 'gold' : clientClass === 'ief' ? 'teal' : 'violet'})">
                     <div class="task-checkbox ${t.completed?'completed':''}"></div>
                     <div class="task-content">
-                        <div class="lead-task-program"><span class="entity-badge ${t.entity}">${t.entity.toUpperCase()}</span> ${esc(t.programName)}</div>
+                        <div class="lead-task-program"><span class="client-badge ${clientClass}">${esc(t.client)}</span> ${esc(t.programName)}</div>
                         <div class="task-title ${t.completed?'completed':''}">${esc(t.name)}</div>
                         <div class="task-meta">
                             ${t.assignee?`<span>👤 ${esc(t.assignee)}</span>`:''}
@@ -1761,7 +1834,7 @@
                 const over = d < new Date();
                 return `<div class="deadline-item ${over?'overdue':''}">
                     <div class="deadline-date"><div class="deadline-day">${d.getDate()}</div><div class="deadline-month">${d.toLocaleDateString('en-US',{month:'short'})}</div></div>
-                    <div class="deadline-content"><div class="deadline-task">${esc(t.name)}</div><div class="deadline-meta">${esc(t.programName)} · ${esc(t.assignee||'')}</div></div>
+                    <div class="deadline-content"><div class="deadline-task">${esc(t.name)}</div><div class="deadline-meta">${esc(t.client)} · ${esc(t.assignee||'')}</div></div>
                 </div>`;
             }).join('') : '<p style="color:var(--text-muted);font-size:0.7rem;text-align:center">No deadlines</p>';
             
